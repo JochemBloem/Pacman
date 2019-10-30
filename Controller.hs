@@ -2,8 +2,8 @@
 --   in response to time and user input
 module Controller where
 
-    import Model
     import Types
+    import Movable
     
     import Graphics.Gloss
     import Graphics.Gloss.Interface.IO.Game
@@ -11,7 +11,24 @@ module Controller where
     
     -- | Handle one iteration of the game
     step :: Float -> Gamestate -> IO Gamestate
-    step _ = return
+    step secs gstate | elapsedTime gstate + secs > nO_SECS_BETWEEN_CYCLES = return $ gstate { player      = newPacman                , elapsedTime = 0 }
+                     | otherwise                                          = return $ gstate { elapsedTime = elapsedTime gstate + secs }
+        where  
+          pacman                                        = player gstate
+          newPacman                                     = move newPacman' (maze gstate)
+          newPacman' | pacmanIsOnTile (location pacman) = changeDirection pacman (newDir gstate) (maze gstate)
+                     | otherwise                        = pacman
+          
+          {-
+          TODO step
+          Update locations (pacman and ghost)
+          update gstate timer
+          update ghosttimers (if GhostBehaviour != frightened)
+          check pacmans field AND newDir
+          check pacmans ghosts
+     -}
+
+
 {- 
     step secs gstate
       | elapsedTime gstate + secs > nO_SECS_BETWEEN_CYCLES
@@ -25,7 +42,14 @@ module Controller where
     -}
     -- | Handle user input
     input :: Event -> Gamestate -> IO Gamestate
-    input _ = return
+    input e gstate = return (inputKey e gstate)
+
+    inputKey :: Event -> Gamestate -> Gamestate
+    inputKey (EventKey (Char 'w') _ _ _) gstate = gstate { newDir = N }
+    inputKey (EventKey (Char 'a') _ _ _) gstate = gstate { newDir = W }
+    inputKey (EventKey (Char 's') _ _ _) gstate = gstate { newDir = S }
+    inputKey (EventKey (Char 'd') _ _ _) gstate = gstate { newDir = E }
+    inputKey _ gstate = gstate -- Otherwise keep the same
     {-
     input e gstate = return (inputKey e gstate)
 
@@ -36,3 +60,5 @@ module Controller where
     inputKey _ gstate = gstate -- Otherwise keep the same
     
   -}
+
+    

@@ -12,7 +12,9 @@ module General where
      -}
 
     initialGameState :: Gamestate
-    initialGameState = Gamestate initialMaze initialPacman initialEnemies 0 0 GameOn
+    initialGameState = Gamestate initialMaze p initialEnemies d 0 0 0 GameOn
+                    where 
+                        p@(Pacman _ d _) = initialPacman
 
     {- 
         MAZE 
@@ -20,17 +22,17 @@ module General where
     initialMaze :: Maze
     initialMaze = [ Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall,
                     Wall, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Wall,
-                    Wall, Item, Wall, Wall, Wall, Item, Item, Item, Item, Item, Wall, Wall, Wall, Item, Wall,
-                    Wall, Item, Wall, Item, Item, Item, Item, Item, Item, Item, Item, Item, Wall, Item, Wall,
-                    Wall, Item, Wall, Item, Item, Item, Item, Item, Item, Item, Item, Item, Wall, Item, Wall,
+                    Wall, Item, Wall, Wall, Wall, Item, Wall, Wall, Wall, Item, Wall, Wall, Wall, Item, Wall,
+                    Wall, Item, Wall, Item, Item, Item, Wall, Item, Wall, Item, Item, Item, Wall, Item, Wall,
+                    Wall, Item, Wall, Item, Wall, Item, Item, Item, Item, Item, Wall, Item, Wall, Item, Wall,
                     Wall, Item, Item, Item, Item, Wall, Wall, Wall, Wall, Wall, Item, Item, Item, Item, Wall,
-                    Wall, Item, Wall, Wall, Item, Wall, Spawn, Spawn, Spawn, Wall, Item, Item, Item, Item, Wall,
-                    Wall, Item, Wall, Item, Item, Wall, Spawn, Spawn, Spawn, Wall, Item, Item, Item, Item, Wall,
-                    Wall, Item, Wall, Wall, Item, Wall, Spawn, Spawn, Spawn, Wall, Item, Item, Item, Item, Wall,
+                    Wall, Item, Wall, Wall, Item, Wall, Spawn, Spawn, Spawn, Wall, Item, Wall, Wall, Item, Wall,
+                    Wall, Item, Wall, Item, Item, Wall, Spawn, Spawn, Spawn, Wall, Item, Item, Wall, Item, Wall,
+                    Wall, Item, Wall, Wall, Item, Wall, Spawn, Spawn, Spawn, Wall, Item, Wall, Wall, Item, Wall,
                     Wall, Item, Item, Item, Item, Wall, Wall, SpawnDoor, Wall, Wall, Item, Item, Item, Item, Wall,
-                    Wall, Item, Wall, Item, Item, Item, Item, Item, Item, Item, Item, Item, Wall, Item, Wall,
-                    Wall, Item, Wall, Item, Item, Item, Item, Item, Item, Item, Item, Item, Wall, Item, Wall,
-                    Wall, Item, Wall, Wall, Wall, Item, Item, Item, Item, Item, Wall, Wall, Wall, Item, Wall,
+                    Wall, Item, Wall, Item, Wall, Item, Item, Item, Item, Item, Wall, Item, Wall, Item, Wall,
+                    Wall, Item, Wall, Item, Item, Item, Wall, Item, Wall, Item, Item, Item, Wall, Item, Wall,
+                    Wall, Item, Wall, Wall, Wall, Item, Wall, Wall, Wall, Item, Wall, Wall, Wall, Item, Wall,
                     Wall, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Wall,
                     Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall
                   ]
