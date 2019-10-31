@@ -7,17 +7,18 @@ module Controller where
     
     import Graphics.Gloss
     import Graphics.Gloss.Interface.IO.Game
-    import System.Random
+    -- import System.Random
     
     -- | Handle one iteration of the game
     step :: Float -> Gamestate -> IO Gamestate
-    step secs gstate | elapsedTime gstate + secs > nO_SECS_BETWEEN_CYCLES = return $ gstate { player      = newPacman                , elapsedTime = 0 }
+    step secs gstate | elapsedTime gstate + secs > nO_SECS_BETWEEN_CYCLES = return $ gstate { player      = newPacman                , elapsedTime = 0, enemies = newGhosts }
                      | otherwise                                          = return $ gstate { elapsedTime = elapsedTime gstate + secs }
         where  
           pacman                                        = player gstate
           newPacman                                     = move newPacman' (maze gstate)
           newPacman' | pacmanIsOnTile (location pacman) = changeDirection pacman (newDir gstate) (maze gstate)
                      | otherwise                        = pacman
+          newGhosts                                     = map (flip move $ maze gstate) (aiSteps gstate $ enemies gstate) 
           
           {-
           TODO step

@@ -112,7 +112,7 @@ module Movable where
     initialEnemies = [Blinky (7,10) W Chase 0, Pinky (7,7) S Chase 0, Inky (6,7) N Chase 0, Clyde (8,7) N Chase 0]
 
     aiSteps :: Gamestate -> [Ghost] -> [Ghost]
-    aiSteps gstate= map (aiStep gstate)
+    aiSteps gstate = map (aiStep gstate)
     
     aiStep :: Gamestate -> Ghost -> Ghost
     aiStep gstate g@(Blinky loc dir gb ms) | gb == Chase      = Blinky loc newDir gb ms
@@ -126,6 +126,8 @@ module Movable where
     aiStep gstate g@(Inky   loc dir gb ms) = g
     aiStep gstate g@(Clyde  loc dir gb ms) = g
 
+
+    -- Implements the BFS Pathfinding algorithm in Haskell
     findPath :: Maze -> Location -> Location -> Direction
     findPath m l1 l2 = findPath' m l1 l2 (enqueue l1 EmptyQ) []
 
@@ -219,3 +221,8 @@ module Movable where
                     Wall, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Wall,
                     Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall
                   ]
+
+    igstate :: Gamestate
+    igstate = Gamestate im p initialEnemies d 0 0 0 GameOn
+                    where 
+                        p@(Pacman _ d _) = initialPacman
