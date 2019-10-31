@@ -131,7 +131,7 @@ module Movable where
 
 
     findPath' :: Maze -> Location -> Location -> Queue Location -> [(Location, Location)] -> Direction
-    findPath' m origin dest q disc | continue && not (discovered l disc) = isdest dest l                    -- this field has not yet been checked
+    findPath' m origin dest q disc | continue && not (discovered disc l) = isdest dest l                    -- this field has not yet been checked
                                    | continue                            = findPath' m origin dest q'' disc' -- this field has         been checked
                                    | otherwise                           = rwalk start disc                 -- q is empty, but the destination has not been found
                          where 
@@ -141,7 +141,7 @@ module Movable where
                                         Nothing -> (False, defLoc)
                                         
                             an    = accessibleNeighbours m l
-                            an'   = filter (`discovered` disc) an
+                            an'   = filter (not . discovered disc) an
                             
                             -- add the to discovered list
                             disc' = [(n,l) | n <- an'] ++ disc
@@ -152,10 +152,7 @@ module Movable where
                                         []        -> defLoc
                                         ((x,_):_) -> x
 
-                            discovered :: Location -> [(Location, Location)] -> Bool
-                            discovered _ []                     = False
-                            discovered l ((x,_):xs) | l == x    = True
-                                                    | otherwise = discovered l xs
+                            
                                                 
                             isdest :: Location -> Location -> Direction
                             isdest dest l | dest == l = rwalk dest disc
@@ -169,7 +166,10 @@ module Movable where
                                                 [(curr, next)] = [p | p <- route, fst p == from]
     
 
-
+    discovered :: [(Location, Location)] -> Location -> Bool
+    discovered [] _                     = False
+    discovered ((x,_):xs) l | l == x    = True
+                            | otherwise = discovered xs l
     -- returns surrounding locations where Ghosts can go                                           
     accessibleNeighbours :: Maze -> Location -> [Location]
     accessibleNeighbours m l = [loc | (loc,field) <- zipped, field /= Wall]
