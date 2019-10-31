@@ -1,13 +1,20 @@
 module Queue where
     
-    import Types
+    {-
+        IMPORTANT NOTE:
+        We did not write this queue ourselves, we modified the code found here:
+        https://codereview.stackexchange.com/questions/207919/a-simple-queue-implementation-in-haskell
+     -}
+    data Queue a = EmptyQ | Value a (Queue a) deriving (Show, Eq, Read)
 
-    data Queue a = MkQueue [a]
+    enqueue :: a -> Queue a -> Queue a
+    enqueue x EmptyQ          = Value x EmptyQ
+    enqueue x (Value a queue) = Value a (enqueue x queue)
 
-    enqueue :: Queue a -> a -> Queue a
-    enqueue = undefined
+    dequeue :: Queue a -> (Maybe a, Queue a)
+    dequeue EmptyQ          = (Nothing, EmptyQ)
+    dequeue (Value a queue) = (Just a , queue)
 
-    dequeue :: Queue a -> (Queue a, Maybe a)
-    dequeue = undefined
-
-    type Location   = (Float, Float)
+    empty :: Queue a -> Bool
+    empty EmptyQ = True
+    empty _      = False

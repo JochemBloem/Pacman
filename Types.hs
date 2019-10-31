@@ -42,6 +42,7 @@ module Types where
                | Clyde  Location Direction GhostBehaviour Float
           
     data GhostBehaviour = Chase | Frightened | Scatter
+            deriving(Eq)
     
     {-
         CONSTANTS
@@ -66,6 +67,8 @@ module Types where
     screenSizeI :: (Int, Int)
     screenSizeI =  (600, 600)
 
+    defLoc :: Location
+    defLoc = (-1,-1)
     {-
         TRANSLATION FUNCTIONS    
      -}

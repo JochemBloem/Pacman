@@ -3,6 +3,10 @@ module Movable where
         IMPORTS
      -}
     import Types
+    import Queue
+
+    import Data.List (sortBy)
+    import Data.Function (on)
     {- 
         SHOW 
      -} 
@@ -97,6 +101,9 @@ module Movable where
     initialPacmanLocation :: Location
     initialPacmanLocation = (7,3)
 
+    pacmanAccessible :: Field -> Bool
+    pacmanAccessible Item = True
+    pacmanAccessible _    = False
     {- 
         GHOSTS 
      -}
@@ -108,22 +115,84 @@ module Movable where
     aiSteps gstate= map (aiStep gstate)
     
     aiStep :: Gamestate -> Ghost -> Ghost
-    aiStep gstate g@(Blinky loc dir gb ms) | gb == Chase      = g { direction = findPath loc pacLoc }
+    aiStep gstate g@(Blinky loc dir gb ms) | gb == Chase      = Blinky loc newDir gb ms
                                            | gb == Scatter    = g
                                            | gb == Frightened = g
                                            where 
                                             (px, py) = location $ player gstate 
                                             pacLoc   = (round' px, round' py)
+                                            newDir   = findPath (maze gstate) loc pacLoc
     aiStep gstate g@(Pinky  loc dir gb ms) = g
     aiStep gstate g@(Inky   loc dir gb ms) = g
     aiStep gstate g@(Clyde  loc dir gb ms) = g
 
-    findPath :: Location -> Location -> Direction
-    findPath l1 l2 = undefined
+    findPath :: Maze -> Location -> Location -> Direction
+    findPath m l1 l2 = findPath' m l1 l2 (enqueue l1 EmptyQ) []
 
 
-    findPath' :: Location -> Location -> Queue -> Resilt
+    findPath' :: Maze -> Location -> Location -> Queue Location -> [(Location, Location)] -> Direction
+    findPath' m origin dest q disc | continue && not (discovered l disc) = isdest dest l                    -- this field has not yet been checked
+                                   | continue                            = findPath' m origin dest q'' disc' -- this field has         been checked
+                                   | otherwise                           = rwalk start disc                 -- q is empty, but the destination has not been found
+                         where 
+                            (ml, q') = dequeue q
+                            (continue, l) = case ml of 
+                                        Just l  -> (True,  l     )
+                                        Nothing -> (False, defLoc)
+                                        
+                            an    = accessibleNeighbours m l
+                            an'   = filter (`discovered` disc) an
+                            
+                            -- add the to discovered list
+                            disc' = [(n,l) | n <- an'] ++ disc
+                            -- enqueue the accessible neighbours
+                            q'' = foldr enqueue q' an' 
+                            
+                            start = case disc of
+                                        []        -> defLoc
+                                        ((x,_):_) -> x
 
+                            discovered :: Location -> [(Location, Location)] -> Bool
+                            discovered _ []                     = False
+                            discovered l ((x,_):xs) | l == x    = True
+                                                    | otherwise = discovered l xs
+                                                
+                            isdest :: Location -> Location -> Direction
+                            isdest dest l | dest == l = rwalk dest disc
+                                          | otherwise = findPath' m origin dest q'' disc'
+
+                            rwalk :: Location -> [(Location, Location)] -> Direction
+                            rwalk _ []                        = undefined -- THIS SHOULD NOT HAPPEN
+                            rwalk from route | next == origin = getDirection next curr
+                                             | otherwise      = rwalk next route
+                                             where
+                                                [(curr, next)] = [p | p <- route, fst p == from]
+    
+
+
+    -- returns surrounding locations where Ghosts can go                                           
+    accessibleNeighbours :: Maze -> Location -> [Location]
+    accessibleNeighbours m l = [loc | (loc,field) <- zipped, field /= Wall]
+                    where
+                        locs  = neighbours l
+                        zipped = zip locs (map (getField m) locs)                                                      
+                        neighbours :: Location -> [Location]
+                        neighbours (x,y) = [(x, y + 1), (x + 1, y), (x, y - 1), (x - 1, y)]
+    
+    -- tells if a Ghost can walk a field
+    ghostAccessible :: Field -> Bool
+    ghostAccessible Wall = False
+    ghostAccessible _    = True
+    
+    -- Returns direction form loc1 to loc2
+    getDirection :: Location -> Location -> Direction
+    getDirection (x1,y1) (x2,y2) = dir
+                    where
+                        dists       = [(N, y2-y1), (E, x2-x1), (S, y1-y2), (W, x1-x2)]
+                        ((dir,_):_) = sortBy (flip compare `on` snd) dists -- list is hardcoded so cant go wrong
+                        
+    
+    
     updateGhostTimers :: Float -> [Ghost] -> [Ghost]
     updateGhostTimers s = map (updateGhostTimer s)
 
@@ -132,3 +201,21 @@ module Movable where
     updateGhostTimer secs (Pinky  l d g t) = Pinky  l d g (t + secs)
     updateGhostTimer secs (Inky   l d g t) = Inky   l d g (t + secs)
     updateGhostTimer secs (Clyde  l d g t) = Clyde  l d g (t + secs)
+
+    im :: Maze
+    im = [ Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall,
+                    Wall, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Wall,
+                    Wall, Item, Wall, Wall, Wall, Item, Wall, Wall, Wall, Item, Wall, Wall, Wall, Item, Wall,
+                    Wall, Item, Wall, Item, Item, Item, Wall, Item, Wall, Item, Item, Item, Wall, Item, Wall,
+                    Wall, Item, Wall, Item, Wall, Item, Item, Item, Item, Item, Wall, Item, Wall, Item, Wall,
+                    Wall, Item, Item, Item, Item, Wall, Wall, Wall, Wall, Wall, Item, Item, Item, Item, Wall,
+                    Wall, Item, Wall, Wall, Item, Wall, Spawn, Spawn, Spawn, Wall, Item, Wall, Wall, Item, Wall,
+                    Wall, Item, Wall, Item, Item, Wall, Spawn, Spawn, Spawn, Wall, Item, Item, Wall, Item, Wall,
+                    Wall, Item, Wall, Wall, Item, Wall, Spawn, Spawn, Spawn, Wall, Item, Wall, Wall, Item, Wall,
+                    Wall, Item, Item, Item, Item, Wall, Wall, SpawnDoor, Wall, Wall, Item, Item, Item, Item, Wall,
+                    Wall, Item, Wall, Item, Wall, Item, Item, Item, Item, Item, Wall, Item, Wall, Item, Wall,
+                    Wall, Item, Wall, Item, Item, Item, Wall, Item, Wall, Item, Item, Item, Wall, Item, Wall,
+                    Wall, Item, Wall, Wall, Wall, Item, Wall, Wall, Wall, Item, Wall, Wall, Wall, Item, Wall,
+                    Wall, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Wall,
+                    Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall
+                  ]
