@@ -115,17 +115,20 @@ module Movable where
     aiSteps gstate = map (aiStep gstate)
     
     aiStep :: Gamestate -> Ghost -> Ghost
-    aiStep gstate g@(Blinky loc dir gb ms) | gb == Chase      = Blinky loc newDir gb ms
-                                           | gb == Scatter    = g
-                                           | gb == Frightened = g
+    aiStep gstate g@(Blinky loc dir gb ms) = Blinky loc newDir gb ms
                                            where 
                                             (px, py) = location $ player gstate 
                                             pacLoc   = (round' px, round' py)
-                                            newDir   = findPath (maze gstate) loc pacLoc
+                                            m        = maze gstate
+                                            newDir   | gb == Chase      = findPath m loc pacLoc
+                                                     | gb == Scatter    = dir
+                                                     | gb == Frightened = randomDirection m loc dir
     aiStep gstate g@(Pinky  loc dir gb ms) = g
     aiStep gstate g@(Inky   loc dir gb ms) = g
     aiStep gstate g@(Clyde  loc dir gb ms) = g
 
+
+    -- @TODO: put these things in another file
 
     -- Implements the BFS Pathfinding algorithm in Haskell
     findPath :: Maze -> Location -> Location -> Direction
@@ -154,8 +157,6 @@ module Movable where
                                         []        -> defLoc
                                         ((x,_):_) -> x
 
-                            
-                                                
                             isdest :: Location -> Location -> Direction
                             isdest dest l | dest == l = rwalk dest disc
                                           | otherwise = findPath' m origin dest q'' disc'
@@ -192,8 +193,17 @@ module Movable where
                     where
                         dists       = [(N, y2-y1), (E, x2-x1), (S, y1-y2), (W, x1-x2)]
                         ((dir,_):_) = sortBy (flip compare `on` snd) dists -- list is hardcoded so cant go wrong
-                        
+     
     
+    oppositeDirection :: Direction -> Direction
+    oppositeDirection N = S
+    oppositeDirection E = W
+    oppositeDirection S = N
+    oppositeDirection W = E
+
+
+    randomDirection :: Maze -> Location -> Direction -> Direction
+    randomDirection m loc dir = undefined
     
     updateGhostTimers :: Float -> [Ghost] -> [Ghost]
     updateGhostTimers s = map (updateGhostTimer s)
