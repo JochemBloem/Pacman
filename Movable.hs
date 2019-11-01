@@ -7,6 +7,7 @@ module Movable where
 
     import Data.List (sortBy)
     import Data.Function (on)
+    import System.Random
     {- 
         SHOW 
      -} 
@@ -122,7 +123,7 @@ module Movable where
                                             m        = maze gstate
                                             newDir   | gb == Chase      = findPath m loc pacLoc
                                                      | gb == Scatter    = dir
-                                                     | gb == Frightened = randomDirection m loc dir
+                                                     | gb == Frightened = randomDirection m loc
     aiStep gstate g@(Pinky  loc dir gb ms) = g
     aiStep gstate g@(Inky   loc dir gb ms) = g
     aiStep gstate g@(Clyde  loc dir gb ms) = g
@@ -202,8 +203,16 @@ module Movable where
     oppositeDirection W = E
 
 
-    randomDirection :: Maze -> Location -> Direction -> Direction
-    randomDirection m loc dir = undefined
+    randomDirection :: Maze -> Location -> Direction
+    randomDirection m loc = getDirection loc newLoc
+                        where
+                            nbs    = accessibleNeighbours m loc
+                            newLoc = nbs!!getRandomNumber 0 (length nbs)
+
+
+    getRandomNumber :: Int -> Int -> Int
+    getRandomNumber upperLimit lowerLimit = lowerLimit -- @TODOJOCHEM: actueel willekeurig getal                       
+
     
     updateGhostTimers :: Float -> [Ghost] -> [Ghost]
     updateGhostTimers s = map (updateGhostTimer s)
