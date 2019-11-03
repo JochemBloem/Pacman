@@ -55,7 +55,7 @@ module Movable where
         changeDirection (Inky   l _ g t) d _ = Inky   l d g t
         changeDirection (Clyde  l _ g t) d _ = Clyde  l d g t
         -- move ghosts
-        move g@(Blinky l d gb t) m  | targetField == Wall = g 
+        move g@(Blinky l d gb t) m  | targetField == Wall = g -- @TODO: this is the problem, should move a tile
                                     | otherwise           = Blinky targetLoc d gb t
             where (targetLoc, targetField)                = getTargetTile m l d
         move g@(Pinky  l d gb t) m  | targetField == Wall = g 
@@ -116,13 +116,14 @@ module Movable where
     aiSteps gstate = map (aiStep gstate)
     
     aiStep :: Gamestate -> Ghost -> Ghost
-    aiStep gstate g@(Blinky loc dir gb ms) = Blinky loc newDir gb ms
+    aiStep gstate g@(Blinky loc dir gb ms) | isOnTile loc =  Blinky loc newDir gb ms
+                                           | otherwise    = g -- Cant change direction
                                            where 
                                             (px, py) = location $ player gstate 
                                             pacLoc   = (round' px, round' py)
                                             m        = maze gstate
                                             newDir   | gb == Chase      = findPath m loc pacLoc
-                                                     | gb == Scatter    = dir
+                                                     | gb == Scatter    = dir -- @TODO
                                                      | gb == Frightened = randomDirection m loc
     aiStep gstate g@(Pinky  loc dir gb ms) = g
     aiStep gstate g@(Inky   loc dir gb ms) = g
