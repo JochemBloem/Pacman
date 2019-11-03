@@ -92,5 +92,11 @@ module Types where
     round' :: (RealFrac a, Num b) => a -> b
     round' = fromIntegral . round
 
-    pacmanIsOnTile :: Location -> Bool
-    pacmanIsOnTile (x,y) = abs (round' x - x) < 0.01 && abs (round' y - y) < 0.01
+    isOnTile :: Location -> Bool
+    isOnTile (x,y) = abs (round' x - x) < 0.01 && abs (round' y - y) < 0.01
+
+    distance :: Location -> Location -> Float
+    distance (x1,y1) (x2,y2) = sqrt (f (x1-x2) + f (y1-y2))
+                where
+                    f :: Float -> Float
+                    f n = n*n
