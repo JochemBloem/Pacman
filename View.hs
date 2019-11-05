@@ -59,7 +59,7 @@ module View where
     ghostPicture loc dir = Translate dx dy $ Circle (fieldSize / 3) -- TODO GHOST
                             where
                               i        = locationToIndex loc
-                              (dx, dy) = toScreenSpace i
+                              (dx, dy) = characterSpaceToScreenSpace loc
     {-
         Helper functions
      -}

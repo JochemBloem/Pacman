@@ -51,8 +51,8 @@ module Types where
     nO_SECS_BETWEEN_CYCLES :: Float
     nO_SECS_BETWEEN_CYCLES = 0.05
      
-    pacmanSpeed :: Float
-    pacmanSpeed = 0.125 -- 1 devided by pacmanspeed must be an integer
+    movableSpeed :: Float
+    movableSpeed = 0.125 -- 1 devided by pacmanspeed must be an integer
 
     pixelsPerField :: Float
     pixelsPerField = 35
