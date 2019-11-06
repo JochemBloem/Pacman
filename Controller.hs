@@ -4,6 +4,7 @@ module Controller where
 
     import Types
     import Movable
+    import General
     
     import Graphics.Gloss
     import Graphics.Gloss.Interface.IO.Game
@@ -11,15 +12,68 @@ module Controller where
     
     -- | Handle one iteration of the game
     step :: Float -> Gamestate -> IO Gamestate
-    step secs gstate | elapsedTime gstate + secs > nO_SECS_BETWEEN_CYCLES = return $ gstate { player      = newPacman                , elapsedTime = 0, enemies = newGhosts }
-                     | otherwise                                          = return $ gstate { elapsedTime = elapsedTime gstate + secs }
+    
+    step secs gstate | mazeEmpty                                          = return $ (resetGameState (score newGstate + 500) (lvl + 1))  { player = resetPacman lvl (lives $ player gstate) }
+                     | elapsedTime gstate + secs > nO_SECS_BETWEEN_CYCLES = return $ finalGstate { elapsedTime = 0
+                                                                                                 , enemies     = newGhosts
+                                                                                                 }
+                     | otherwise                                          = return $ newGstate   { elapsedTime = elapsedTime gstate + secs 
+                                                                                                 }
         where  
-          pacman                                  = player gstate
-          newPacman                               = move newPacman' (maze gstate)
-          newPacman' | isOnTile (location pacman) = changeDirection pacman (newDir gstate) (maze gstate)
-                     | otherwise                  = pacman
-          newGhosts                               = map (flip move $ maze gstate) (aiSteps gstate $ enemies gstate) 
+          -- often used variables
+          pacman    = player gstate
+          pacLoc    = location pacman
+          m         = maze gstate
+          ghostLocs = map getGhostLocation (enemies gstate)
+          lvl       = level gstate
+
+          -- updated pacman
+          newPacman = move newPacman' m
+              where
+                  newPacman' | isOnTile pacLoc = changeDirection pacman (newDir gstate) (maze gstate)
+                             | otherwise       = pacman
+          pacmanDies = roundedLocation (location newPacman) `elem` map roundedLocation ghostLocs
+          -- updated ghosts
+          newGhosts   | pacmanDies = initialEnemies
+                      | otherwise  = map (`move` m) (aiSteps gstate $ enemies gstate) 
+          -- updated score and maze
+          newGstate   | isOnTile pacLoc = updateGstate pacLoc
+                      | otherwise       = gstate
           
+          finalGstate | pacmanDies = newGstate { player  = basePacman newLives
+                                               , status  = newStatus
+                                               }
+                      | otherwise  = newGstate { player  = newPacman
+                                               }
+                      where
+                        newLives   = lives (player gstate) - 1
+                        newStatus  | newLives == 0 = GameOver
+                                   | otherwise     = GameOn
+                        
+          -- Local functions
+          updateGstate :: Location -> Gamestate
+          updateGstate loc = doFieldAction f                                    
+                          where
+                            i = locationToIndex loc
+                            f = getField m loc
+
+                            doFieldAction :: Field ->  Gamestate
+                            doFieldAction Dot       = gstate { score = score gstate +  10, maze = clearLoc }
+                            doFieldAction Energizer = gstate { score = score gstate +  50, maze = clearLoc }
+                            doFieldAction Fruit     = gstate { score = score gstate + 100, maze = clearLoc }
+                            doFieldAction _         = gstate
+                            
+                            clearLoc :: Maze
+                            clearLoc = setMazeField m loc Empty
+                            
+          mazeEmpty :: Bool --     Allowed : Wall Spawn SpawnDoor Empty Fruit
+                            -- Not Allowed : Energizer Dot
+          mazeEmpty = all allowed m
+                    where
+                      allowed :: Field -> Bool
+                      allowed Energizer = False
+                      allowed Dot       = False
+                      allowed _         = True
           {-
           TODO step
           Update locations (pacman and ghost)
