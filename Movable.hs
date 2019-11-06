@@ -39,12 +39,12 @@ module Movable where
         move            :: a -> Maze      -> a
     
     instance Movable Pacman where 
-        changeDirection p@(Pacman lo _ li) d m | targetField == Item = Pacman lo d li
-                                               | otherwise           = p
+        changeDirection p@(Pacman lo _ li) d m | pacmanAccessible targetField = Pacman lo d li
+                                               | otherwise                    = p
                 where
                     (_, targetField) = getTargetTile m lo d
-        move p@(Pacman lo@(x,y) d li) m     | targetField == Item = Pacman targetLoc d li
-                                            | otherwise           = p {location = (round' x, round' y)} -- put pacman in the middle of the field, so he can change direction
+        move p@(Pacman lo@(x,y) d li) m     | pacmanAccessible targetField = Pacman targetLoc d li
+                                            | otherwise                    = p {location = (round' x, round' y)} -- put pacman in the middle of the field, so he can change direction
             where 
                 (targetLoc, targetField)    = getTargetTile m lo d
     
@@ -55,18 +55,18 @@ module Movable where
         changeDirection (Inky   l _ g t) d _ = Inky   l d g t
         changeDirection (Clyde  l _ g t) d _ = Clyde  l d g t
         -- move ghosts
-        move g@(Blinky l d gb t) m  | targetField == Wall = g -- @TODO: this is the problem, should move a tile
-                                    | otherwise           = Blinky targetLoc d gb t
-            where (targetLoc, targetField)                = getTargetTile m l d
-        move g@(Pinky  l d gb t) m  | targetField == Wall = g 
-                                    | otherwise           = Pinky  targetLoc d gb t
-            where (targetLoc, targetField)                = getTargetTile m l d
-        move g@(Inky   l d gb t) m  | targetField == Wall = g 
-                                    | otherwise           = Inky   targetLoc d gb t
-            where (targetLoc, targetField)                = getTargetTile m l d
-        move g@(Clyde  l d gb t) m  | targetField == Wall = g 
-                                    | otherwise           = Clyde  targetLoc d gb t
-            where (targetLoc, targetField)                = getTargetTile m l d
+        move g@(Blinky l@(x, y) d gb t) m  | ghostAccessible targetField = Blinky targetLoc             d gb t
+                                           | otherwise                   = Blinky (round' x, round' y)  d gb t
+            where (targetLoc, targetField) = getTargetTile m l d
+        move g@(Pinky  l@(x, y) d gb t) m  | ghostAccessible targetField = Pinky  targetLoc            d gb t
+                                           | otherwise                   = Pinky  (round' x, round' y) d gb t
+            where (targetLoc, targetField) = getTargetTile m l d
+        move g@(Inky   l@(x, y) d gb t) m  | ghostAccessible targetField = Inky   targetLoc            d gb t
+                                           | otherwise                   = Inky   (round' x, round' y) d gb t
+            where (targetLoc, targetField) = getTargetTile m l d
+        move g@(Clyde  l@(x, y) d gb t) m  | ghostAccessible targetField = Clyde  targetLoc            d gb t
+                                           | otherwise                   = Clyde  (round' x, round' y) d gb t
+            where (targetLoc, targetField) = getTargetTile m l d
 
     getTargetTile :: Maze -> Location -> Direction -> TargetTile
     getTargetTile m (x,y) N = (newLoc, getField m checkLoc) 
@@ -89,22 +89,34 @@ module Movable where
             v               = movableSpeed
             checkLoc        = (round' $ x - (0.5 + v), round' y)
             newLoc          = (x - v, y)
-    
-    getField :: Maze -> Location -> Field
-    getField m l = m!!locationToIndex l 
+
 
     {- 
         PACMAN 
      -}
     initialPacman :: Pacman
-    initialPacman = Pacman initialPacmanLocation S 3
+    initialPacman = basePacman 3
     
     initialPacmanLocation :: Location
     initialPacmanLocation = (7,3)
 
+    initialPacmanDirection :: Direction
+    initialPacmanDirection = S 
+
+    basePacman :: Int -> Pacman
+    basePacman = resetPacman 1 
+
+    resetPacman :: Int -> Int -> Pacman
+    resetPacman level l = Pacman initialPacmanLocation initialPacmanDirection pacmanLives
+            where 
+                pacmanLives  | even level = l + 1
+                             | otherwise  = l
+
     pacmanAccessible :: Field -> Bool
-    pacmanAccessible Item = True
-    pacmanAccessible _    = False
+    pacmanAccessible Wall      = False
+    pacmanAccessible Spawn     = False
+    pacmanAccessible SpawnDoor = False
+    pacmanAccessible _         = True
     {- 
         GHOSTS 
      -}
@@ -120,7 +132,7 @@ module Movable where
                                            | otherwise    = g -- Cant change direction
                                            where 
                                             (px, py) = location $ player gstate 
-                                            pacLoc   = (7,3) -- (round' px, round' py) -- @TODO: change back
+                                            pacLoc   = (round' px, round' py)
                                             m        = maze gstate
                                             newDir   | gb == Chase      = findPath m loc pacLoc
                                                      | gb == Scatter    = dir -- @TODO
@@ -134,14 +146,11 @@ module Movable where
 
     -- Implements the BFS Pathfinding algorithm in Haskell
     findPath :: Maze -> Location -> Location -> Direction
-    --findPath m l1 l2 = findPath' m l1 l2 (enqueue l1 EmptyQ) []
-    findPath = undefined
+    findPath m l1 l2 = findPath' m l1 l2 (enqueue l1 EmptyQ) []
 
-    findPath' :: Maze -> Location -> Location -> Queue Location -> [(Location, Location)] -> (Direction, Queue Location)
-    findPath' m origin dest EmptyQ disc = undefined
-    findPath' m origin dest q disc | continue && not (discovered disc l) = isdest dest l                     -- this field has not yet been checked
-                                   | continue                            = findPath' m origin dest q'' disc' -- this field has         been checked
-                                   | otherwise                           = (rwalk start disc, q)             -- q is empty, but the destination has not been found
+    findPath' :: Maze -> Location -> Location -> Queue Location -> [(Location, Location)] -> Direction
+    findPath' m origin dest q disc | continue  = isdest dest l    -- check if we found it, if not: recursion
+                                   | otherwise = rwalk start disc -- q is empty, but the destination has not been found. We now calculate the best fitting path
                          where 
                             (ml, q') = dequeue q
                             (continue, l) = case ml of 
@@ -160,9 +169,9 @@ module Movable where
                                         []        -> defLoc
                                         ((x,_):_) -> x
 
-                            isdest :: Location -> Location -> (Direction,Queue Location)
-                            isdest dest l | dest == l = (rwalk dest disc, enqueue (-2,-2) EmptyQ)
-                                          | otherwise = findPath' m origin dest q'' disc'
+                            isdest :: Location -> Location -> Direction
+                            isdest localdest l | localdest == l = rwalk localdest disc
+                                               | otherwise = findPath' m origin localdest q'' disc'
 
                             rwalk :: Location -> [(Location, Location)] -> Direction
                             rwalk _ []                        = undefined -- THIS SHOULD NOT HAPPEN
@@ -188,6 +197,9 @@ module Movable where
 
     b2 :: Location
     b2 = (6,10)
+
+    b3 :: Location
+    b3 = (5,10)
 
     l1 :: [(Location,Location)]
     l1 = [((7.0,3.0),(7.0,4.0)),((7.0,1.0),(6.0,1.0)),((10.0,1.0),(9.0,1.0)),((8.0,1.0),(9.0,1.0)),((7.0,4.0),(6.0,4.0)),((6.0,1.0),(5.0,1.0)),((4.0,1.0),(3.0,1.0)),((11.0,1.0),(12.0,1.0)),((8.0,4.0),(9.0,4.0)),((9.0,1.0),(9.0,2.0)),((6.0,4.0),(5.0,4.0)),((5.0,1.0),(5.0,2.0)),((3.0,1.0),(2.0,1.0)),((12.0,1.0),(13.0,1.0)),((9.0,4.0),(9.0,3.0)),((9.0,2.0),(9.0,3.0)),((5.0,4.0),(5.0,3.0)),((5.0,2.0),(5.0,3.0)),((2.0,1.0),(1.0,1.0)),((13.0,1.0),(13.0,2.0)),((9.0,3.0),(10.0,3.0)),((5.0,3.0),(4.0,3.0)),((1.0,1.0),(1.0,2.0)),((13.0,2.0),(13.0,3.0)),((10.0,3.0),(11.0,3.0)),((4.0,3.0),(3.0,3.0)),((1.0,2.0),(1.0,3.0)),((13.0,3.0),(13.0,4.0)),((11.0,3.0),(11.0,4.0)),((3.0,3.0),(3.0,4.0)),((1.0,3.0),(1.0,4.0)),((13.0,4.0),(13.0,5.0)),((12.0,5.0),(11.0,5.0)),((11.0,4.0),(11.0,5.0)),((3.0,4.0),(3.0,5.0)),((2.0,5.0),(1.0,5.0)),((1.0,4.0),(1.0,5.0)),((13.0,5.0),(13.0,6.0)),((11.0,5.0),(10.0,5.0)),((3.0,5.0),(4.0,5.0)),((1.0,5.0),(1.0,6.0)),((13.0,6.0),(13.0,7.0)),((10.0,5.0),(10.0,6.0)),((4.0,5.0),(4.0,6.0)),((1.0,6.0),(1.0,7.0)),((13.0,11.0),(13.0,10.0)),((13.0,7.0),(13.0,8.0)),((11.0,7.0),(10.0,7.0)),((10.0,6.0),(10.0,7.0)),((4.0,6.0),(4.0,7.0)),((3.0,7.0),(4.0,7.0)),((1.0,11.0),(1.0,10.0)),((1.0,7.0),(1.0,8.0)),((13.0,12.0),(13.0,13.0)),((13.0,10.0),(13.0,9.0)),((13.0,8.0),(13.0,9.0)),((10.0,7.0),(10.0,8.0)),((1.0,12.0),(1.0,13.0)),((4.0,7.0),(4.0,8.0)),((1.0,10.0),(1.0,9.0)),((1.0,8.0),(1.0,9.0)),((13.0,13.0),(12.0,13.0)),((13.0,9.0),(12.0,9.0)),((10.0,8.0),(10.0,9.0)),((1.0,13.0),(2.0,13.0)),((4.0,8.0),(4.0,9.0)),((1.0,9.0),(2.0,9.0)),((12.0,13.0),(11.0,13.0)),((12.0,9.0),(11.0,9.0)),((10.0,9.0),(11.0,9.0)),((2.0,13.0),(3.0,13.0)),((4.0,9.0),(3.0,9.0)),((2.0,9.0),(3.0,9.0)),((11.0,13.0),(10.0,13.0)),((11.0,9.0),(11.0,10.0)),((7.0,13.0),(6.0,13.0)),((3.0,13.0),(4.0,13.0)),((3.0,9.0),(3.0,10.0)),((10.0,13.0),(9.0,13.0)),((8.0,13.0),(9.0,13.0)),((11.0,10.0),(11.0,11.0)),((6.0,13.0),(5.0,13.0)),((4.0,13.0),(5.0,13.0)),((3.0,10.0),(3.0,11.0)),((9.0,13.0),(9.0,12.0)),((11.0,11.0),(10.0,11.0)),((8.0,6.0),(7.0,6.0)),((6.0,6.0),(6.0,7.0)),((5.0,13.0),(5.0,12.0)),((3.0,11.0),(4.0,11.0)),((9.0,12.0),(9.0,11.0)),((10.0,11.0),(9.0,11.0)),((8.0,7.0),(7.0,7.0)),((7.0,6.0),(7.0,7.0)),((6.0,7.0),(6.0,8.0)),((5.0,12.0),(5.0,11.0)),((4.0,11.0),(5.0,11.0)),((9.0,11.0),(9.0,10.0)),((8.0,8.0),(7.0,8.0)),((7.0,7.0),(7.0,8.0)),((6.0,8.0),(7.0,8.0)),((5.0,11.0),(5.0,10.0)),((9.0,10.0),(8.0,10.0)),((7.0,8.0),(7.0,9.0)),((7.0,10.0),(6.0,10.0)),((5.0,10.0),(6.0,10.0)),((7.0,11.0),(7.0,10.0)),((8.0,10.0),(7.0,10.0)),((7.0,9.0),(7.0,10.0)),((6.0,10.0),(7.0,10.0))]
@@ -250,21 +262,21 @@ module Movable where
 
     im :: Maze
     im = [ Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall,
-                    Wall, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Wall,
-                    Wall, Item, Wall, Wall, Wall, Item, Wall, Wall, Wall, Item, Wall, Wall, Wall, Item, Wall,
-                    Wall, Item, Wall, Item, Item, Item, Wall, Item, Wall, Item, Item, Item, Wall, Item, Wall,
-                    Wall, Item, Wall, Item, Wall, Item, Item, Item, Item, Item, Wall, Item, Wall, Item, Wall,
-                    Wall, Item, Item, Item, Item, Wall, Wall, Wall, Wall, Wall, Item, Item, Item, Item, Wall,
-                    Wall, Item, Wall, Wall, Item, Wall, Spawn, Spawn, Spawn, Wall, Item, Wall, Wall, Item, Wall,
-                    Wall, Item, Wall, Item, Item, Wall, Spawn, Spawn, Spawn, Wall, Item, Item, Wall, Item, Wall,
-                    Wall, Item, Wall, Wall, Item, Wall, Spawn, Spawn, Spawn, Wall, Item, Wall, Wall, Item, Wall,
-                    Wall, Item, Item, Item, Item, Wall, Wall, SpawnDoor, Wall, Wall, Item, Item, Item, Item, Wall,
-                    Wall, Item, Wall, Item, Wall, Item, Item, Item, Item, Item, Wall, Item, Wall, Item, Wall,
-                    Wall, Item, Wall, Item, Item, Item, Wall, Item, Wall, Item, Item, Item, Wall, Item, Wall,
-                    Wall, Item, Wall, Wall, Wall, Item, Wall, Wall, Wall, Item, Wall, Wall, Wall, Item, Wall,
-                    Wall, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Item, Wall,
-                    Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall
-                  ]
+        Wall, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Wall,
+        Wall, Dot, Wall, Wall, Wall, Dot, Wall, Wall, Wall, Dot, Wall, Wall, Wall, Dot, Wall,
+        Wall, Dot, Wall, Energizer, Dot, Dot, Wall, Dot, Wall, Dot, Dot, Energizer, Wall, Dot, Wall,
+        Wall, Dot, Wall, Dot, Wall, Dot, Dot, Dot, Dot, Dot, Wall, Dot, Wall, Dot, Wall,
+        Wall, Dot, Dot, Dot, Dot, Wall, Wall, Wall, Wall, Wall, Dot, Dot, Dot, Dot, Wall,
+        Wall, Dot, Wall, Wall, Dot, Wall, Spawn, Spawn, Spawn, Wall, Dot, Wall, Wall, Dot, Wall,
+        Wall, Dot, Wall, Dot, Dot, Wall, Spawn, Spawn, Spawn, Wall, Dot, Dot, Wall, Dot, Wall,
+        Wall, Dot, Wall, Wall, Dot, Wall, Spawn, Spawn, Spawn, Wall, Dot, Wall, Wall, Dot, Wall,
+        Wall, Dot, Dot, Dot, Dot, Wall, Wall, SpawnDoor, Wall, Wall, Dot, Dot, Dot, Dot, Wall,
+        Wall, Dot, Wall, Dot, Wall, Dot, Dot, Dot, Dot, Dot, Wall, Dot, Wall, Dot, Wall,
+        Wall, Dot, Wall, Energizer, Dot, Dot, Wall, Empty, Wall, Dot, Dot, Energizer, Wall, Dot, Wall,
+        Wall, Dot, Wall, Wall, Wall, Dot, Wall, Wall, Wall, Dot, Wall, Wall, Wall, Dot, Wall,
+        Wall, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Wall,
+        Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall
+        ]
 
     igstate :: Gamestate
     igstate = Gamestate im p initialEnemies d 0 0 0 GameOn
