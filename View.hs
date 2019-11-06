@@ -3,6 +3,7 @@
 module View where
 
     import Graphics.Gloss
+    import Graphics.Gloss.Data.Picture
     import Types
     import Movable
     import HelperFunctions
@@ -36,10 +37,10 @@ module View where
                     (dx, dy) = toScreenSpace i
                     w        = fieldSize / 2
     viewField (Empty,     i) = Blank
-    viewField (Energizer, i) = color yellow (Translate dx dy $ ThickCircle (scaledFieldSize 0.3  / 2) 1)
+    viewField (Energizer, i) = color yellow (Translate dx dy $ circleSolid (scaledFieldSize 0.3  / 2))
                   where 
                     (dx, dy) = toScreenSpace i
-    viewField (Dot,       i) = color yellow (Translate dx dy $ ThickCircle (scaledFieldSize 0.15 / 2) 1)
+    viewField (Dot,       i) = color yellow (Translate dx dy $ circleSolid (scaledFieldSize 0.15 / 2))
                   where 
                     (dx, dy) = toScreenSpace i
     viewField (Fruit,     i) = color red (Translate dx dy $ rectangleWire fsize fsize)
@@ -64,7 +65,7 @@ module View where
         Movable view functions
      -}
     viewPacman :: Pacman -> Picture
-    viewPacman p@(Pacman loc dir _)= Translate dx dy $ color (makeColorI 255 255 0 255) $ Circle (fieldSize / 2) -- TODO: not circle
+    viewPacman p@(Pacman loc dir _)= Translate dx dy $ color (makeColorI 255 255 0 255) $ circleSolid (fieldSize / 2) -- TODO: not circle
                                     where 
                                       i        = locationToIndex loc
                                       (dx, dy) = characterSpaceToScreenSpace $ location p
@@ -79,7 +80,7 @@ module View where
     viewGhost (Clyde  loc dir _ _) = color (makeColorI 255 184 82  255) $ ghostPicture loc dir
 
     ghostPicture :: Location -> Direction -> Picture
-    ghostPicture loc dir = Translate dx dy $ Circle (fieldSize / 3) -- TODO GHOST
+    ghostPicture loc dir = Translate dx dy $ circleSolid (fieldSize / 3) -- TODO GHOST
                             where
                               i        = locationToIndex loc
                               (dx, dy) = characterSpaceToScreenSpace loc
