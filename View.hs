@@ -54,12 +54,12 @@ module View where
      -}
      
     viewHeaders :: Gamestate -> Picture
-    viewHeaders (Gamestate _ (Pacman _ _ lives) _ _ score level _ _) = Translate dx dy $ scale' 0.2 $ color white $ Text headers
+    viewHeaders (Gamestate _ (Pacman _ _ lives) ( Blinky _ _ _ s :_ ) _ score level _ _) = Translate dx dy $ scale' 0.2 $ color white $ Text headers
                     where
                       (x, y) = screenSizeF
                       dx = (-1) * (x / 2) * 0.9
                       dy =        (y / 2) * 0.88
-                      headers = "Lives: " ++ show lives ++ "  Score: " ++ show score ++ "  Level: " ++ show level
+                      headers = "Lives: " ++ show lives ++ "  Score: " ++ show score ++ "  Level: " ++ show level ++ "  Bclock: " ++ show s
     {-
         Movable view functions
      -}

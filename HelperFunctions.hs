@@ -41,8 +41,8 @@ module HelperFunctions where
     {-
         MAZE
      -}
-    setMazeField :: Maze -> Location -> Field -> Maze
-    setMazeField m loc f = take n m ++ [f] ++ drop (n + 1) m
+    setField :: Maze -> Location -> Field -> Maze
+    setField m loc f = take n m ++ [f] ++ drop (n + 1) m
                     where
                         n = locationToIndex loc
 

@@ -72,7 +72,7 @@ module Initials where
     resetPacman :: Int -> Int -> Pacman
     resetPacman level l = Pacman initialPacmanLocation initialPacmanDirection pacmanLives
             where 
-                pacmanLives  | even level = l + 1
+                pacmanLives | even level = l + 1
                             | otherwise  = l
 
     {- 
@@ -81,4 +81,14 @@ module Initials where
 
     initialEnemies :: [Ghost]
     initialEnemies = [Blinky (7,10) W Chase 0, Pinky (7,7) S Chase 0, Inky (6,7) N Chase 0, Clyde (8,7) N Chase 0]
-          
+
+    -- Scatter locations
+    scatterLocation :: Ghost -> Location
+    scatterLocation Blinky {} = boardSizeF -- Upper right corner
+    scatterLocation Pinky  {} = ( 0, by)   -- upper left  corner
+                           where
+                            (_,by) = boardSizeF
+    scatterLocation Inky   {} = (bx,  0)   -- Lower right corner 
+                         where
+                            (bx,_) = boardSizeF
+    scatterLocation Clyde  {} = ( 0,  0)   -- Lower left  corner

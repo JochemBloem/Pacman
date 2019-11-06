@@ -36,7 +36,7 @@ module Controller where
           pacmanDies = roundedLocation (location newPacman) `elem` map roundedLocation ghostLocs
           -- updated ghosts
           newGhosts   | pacmanDies = initialEnemies
-                      | otherwise  = map (`move` m) (aiSteps gstate $ enemies gstate) 
+                      | otherwise  = updateGhostTimers secs (map (`move` m) (aiSteps gstate $ enemies gstate) )
           -- updated score and maze
           newGstate   | isOnTile pacLoc = updateGstate pacLoc
                       | otherwise       = gstate
@@ -65,7 +65,7 @@ module Controller where
                             doFieldAction _         = gstate
                             
                             clearLoc :: Maze
-                            clearLoc = setMazeField m loc Empty
+                            clearLoc = setField m loc Empty
                             
           mazeEmpty :: Bool --     Allowed : Wall Spawn SpawnDoor Empty Fruit
                             -- Not Allowed : Energizer Dot

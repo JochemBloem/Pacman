@@ -6,14 +6,16 @@ module BFS where
     import Queue
     import HelperFunctions
 
+    import Data.Sort
+
 
     -- Implements the BFS Pathfinding algorithm in Haskell
     findPath :: Maze -> Location -> Location -> Direction
     findPath m l1 l2 = findPath' m l1 l2 (enqueue l1 EmptyQ) []
 
     findPath' :: Maze -> Location -> Location -> Queue Location -> [(Location, Location)] -> Direction
-    findPath' m origin dest q disc | continue  = isdest dest l    -- check if we found it, if not: recursion
-                                | otherwise = rwalk start disc -- q is empty, but the destination has not been found. We now calculate the best fitting path
+    findPath' m origin dest q disc | continue  = isdest dest l      -- check if we found it, if not: recursion
+                                   | otherwise = rwalk closest disc -- q is empty, but the destination has not been found. We now calculate the best fitting path
                         where 
                             (ml, q') = dequeue q
                             (continue, l) = case ml of 
@@ -28,19 +30,17 @@ module BFS where
                             -- enqueue the accessible neighbours
                             q'' = foldr enqueue q' an' 
                             
-                            start = case disc of
-                                        []        -> defLoc
-                                        ((x,_):_) -> x
+                            ((_,closest):_) = sort [((`distance` dest) loc, loc) | (loc,_) <- disc]
 
                             isdest :: Location -> Location -> Direction
                             isdest localdest l | localdest == l = rwalk localdest disc
-                                            | otherwise = findPath' m origin localdest q'' disc'
+                                               | otherwise      = findPath' m origin localdest q'' disc'
 
                             rwalk :: Location -> [(Location, Location)] -> Direction
                             rwalk _ []                        = undefined -- THIS SHOULD NOT HAPPEN
                             rwalk curr route | next == origin = getDirection next curr
-                                            | otherwise      = rwalk next route
-                                            where
+                                             | otherwise      = rwalk next route
+                                             where
                                                 [(_, next)] = [p | p <- route, fst p == curr]
 
                                                 

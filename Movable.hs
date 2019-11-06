@@ -5,7 +5,7 @@ module Movable where
     import Types
     import BFS
     import HelperFunctions
-
+    import Initials
    
     {- 
         SHOW 
@@ -88,7 +88,12 @@ module Movable where
             v               = movableSpeed
             checkLoc        = (round' $ x - (0.5 + v), round' y)
             newLoc          = (x - v, y)
-
+    
+    shiftLocation :: Direction -> Location -> Float -> Location
+    shiftLocation N (x,y) n = (x  , y+n)
+    shiftLocation E (x,y) n = (x+n, y  )
+    shiftLocation S (x,y) n = (x  , y-n)
+    shiftLocation W (x,y) n = (x-n, y  )
 
     
     
@@ -107,9 +112,18 @@ module Movable where
                                             pacLoc   = (round' px, round' py)
                                             m        = maze gstate
                                             newDir   | gb == Chase      = findPath m loc pacLoc
-                                                     | gb == Scatter    = dir -- @TODO
+                                                     | gb == Scatter    = findPath m loc $ scatterLocation g
                                                      | gb == Frightened = randomDirection m loc
-    aiStep gstate g@(Pinky  loc dir gb ms) = g
+    aiStep gstate g@(Pinky  loc dir gb ms) | isOnTile loc = Pinky loc newDir gb ms
+                                           | otherwise    = g -- Cant change direction
+                                           where 
+                                            pacman   = player gstate
+                                            (px, py) = location pacman
+                                            pacLoc   = (round' px, round' py)
+                                            m        = maze gstate
+                                            newDir   | gb == Chase      = findPath m loc (shiftLocation (direction pacman) pacLoc 4)
+                                                     | gb == Scatter    = findPath m loc $ scatterLocation g
+                                                     | gb == Frightened = randomDirection m loc
     aiStep gstate g@(Inky   loc dir gb ms) = g
     aiStep gstate g@(Clyde  loc dir gb ms) = g
 
