@@ -15,7 +15,7 @@ module Initials where
     resetGameState :: Int -> Int -> Gamestate
     resetGameState score level = Gamestate initialMaze p initialEnemies d score level 0 GameOn
             where 
-                p@(Pacman _ d _) = initialPacman
+                p@(Pacman _ d _ _) = initialPacman
     {- 
         MAZE 
      -}
@@ -70,7 +70,7 @@ module Initials where
     basePacman = resetPacman 1 
 
     resetPacman :: Int -> Int -> Pacman
-    resetPacman level l = Pacman initialPacmanLocation initialPacmanDirection pacmanLives
+    resetPacman level l = Pacman initialPacmanLocation initialPacmanDirection pacmanLives 45
             where 
                 pacmanLives | even level = l + 1
                             | otherwise  = l

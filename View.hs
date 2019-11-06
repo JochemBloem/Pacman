@@ -55,7 +55,7 @@ module View where
      -}
      
     viewHeaders :: Gamestate -> Picture
-    viewHeaders (Gamestate _ (Pacman _ _ lives) ( Blinky _ _ _ s :_ ) _ score level _ _) = Translate dx dy $ scale' 0.2 $ color white $ Text headers
+    viewHeaders (Gamestate _ (Pacman _ _ lives _) ( Blinky _ _ _ s :_ ) _ score level _ _) = Translate dx dy $ scale' 0.2 $ color white $ Text headers
                     where
                       (x, y) = screenSizeF
                       dx = (-1) * (x / 2) * 0.9
@@ -65,10 +65,15 @@ module View where
         Movable view functions
      -}
     viewPacman :: Pacman -> Picture
-    viewPacman p@(Pacman loc dir _)= Translate dx dy $ color (makeColorI 255 255 0 255) $ circleSolid (fieldSize / 2) -- TODO: not circle
+    viewPacman p@(Pacman loc dir _ ma) = Translate dx dy $ rotate' dir basePacman -- @TODO Mouth opening and closing animation: use variable arc in basePacman. 
                                     where 
                                       i        = locationToIndex loc
                                       (dx, dy) = characterSpaceToScreenSpace $ location p
+                                      hwidth   = pixelsPerField / 3
+                                      angle    = abs ma
+
+                                      basePacman :: Picture
+                                      basePacman = Rotate (-90) $ color (makeColorI 255 255 0 255) $ arcSolid angle (360-angle) hwidth -- rotate so it faces north, so we can use the rotate' function
 
     viewGhosts :: [Ghost] -> [Picture]
     viewGhosts = map viewGhost
@@ -80,10 +85,33 @@ module View where
     viewGhost (Clyde  loc dir _ _) = color (makeColorI 255 184 82  255) $ ghostPicture loc dir
 
     ghostPicture :: Location -> Direction -> Picture
-    ghostPicture loc dir = Translate dx dy $ circleSolid (fieldSize / 3) -- TODO GHOST
+    ghostPicture loc dir = Translate dx dy $ Pictures [ arcSolid 0 180 (fieldSize / 3), polygon path, eye1, eye2]
                             where
-                              i        = locationToIndex loc
-                              (dx, dy) = characterSpaceToScreenSpace loc
+                              i          = locationToIndex loc
+                              (dx, dy)   = characterSpaceToScreenSpace loc
+                              path       = [(-hwidth,0),(hwidth,0),(hwidth,tbottom), (u2,ttop),(0, tbottom),(u1,ttop),(-hwidth, tbottom)]
+                              hwidth     = pixelsPerField / 3
+                              tbottom    = -hwidth
+                              ttop       = tbottom + 0.5*hwidth
+                              u1         = 0.33 * hwidth
+                              u2         = 2*u1
+                              eyespacing = 0.5*hwidth
+                              eye1       = Translate (-eyespacing) 0 $ rotate' dir eye
+                              eye2       = Translate   eyespacing  0 $ rotate' dir eye
+
+                              -- eyes
+                              
+                              eye :: Picture
+                              eye = Pictures [ color white $ circleSolid eyesize, Translate 0 (eyesize - pupilsize) $ color black $ circleSolid pupilsize ]
+                                  where
+                                    eyesize   = 0.3  * hwidth
+                                    pupilsize = 0.15 * hwidth
+                              
+    rotate' :: Direction -> Picture -> Picture
+    rotate' N p = p
+    rotate' E p = Rotate 90  p
+    rotate' S p = Rotate 180 p
+    rotate' W p = Rotate 270 p
     {-
         Helper functions
      -}

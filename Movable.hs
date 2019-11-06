@@ -20,7 +20,7 @@ module Movable where
         show Scatter    = "Scatter"
         show Frightened = "Frightened"
     instance Show Pacman where
-        show (Pacman lo d li ) = "Pacman:\n    Location:  " ++ show lo ++ "\n    Direction: " ++ show d ++ "\n    Lives:     " ++ show li ++ "\n" 
+        show (Pacman lo d li _) = "Pacman:\n    Location:  " ++ show lo ++ "\n    Direction: " ++ show d ++ "\n    Lives:     " ++ show li ++ "\n" 
     instance Show Ghost where
         show (Blinky l d g t)  = stringifyGhost "Blinky" l d g t
         show (Pinky  l d g t)  = stringifyGhost "Pinky"  l d g t
@@ -38,14 +38,17 @@ module Movable where
         move            :: a -> Maze      -> a
     
     instance Movable Pacman where 
-        changeDirection p@(Pacman lo _ li) d m | pacmanAccessible targetField = Pacman lo d li
-                                               | otherwise                    = p
+        changeDirection p@(Pacman lo _ li ma) d m | pacmanAccessible targetField = Pacman lo d li ma
+                                                  | otherwise                    = p
                 where
                     (_, targetField) = getTargetTile m lo d
-        move p@(Pacman lo@(x,y) d li) m     | pacmanAccessible targetField = Pacman targetLoc d li
-                                            | otherwise                    = p {location = (round' x, round' y)} -- put pacman in the middle of the field, so he can change direction
+        move p@(Pacman lo@(x,y) d li ma) m     | pacmanAccessible targetField = Pacman targetLoc d li newangle'
+                                               | otherwise                    = p {location = (round' x, round' y)} -- put pacman in the middle of the field, so he can change direction
             where 
-                (targetLoc, targetField)    = getTargetTile m lo d
+                (targetLoc, targetField)     = getTargetTile m lo d
+                newangle                     = ma - 8
+                newangle' | newangle < (-45) = 45
+                          | otherwise        = newangle
     
     instance Movable Ghost where
         -- change ghost directions

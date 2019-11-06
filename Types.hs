@@ -30,9 +30,10 @@ module Types where
     {-
         CHARACTERS
      -}
-    data Pacman = Pacman { location  :: Location
-                         , direction :: Direction
-                         , lives     :: Int
+    data Pacman = Pacman { location   :: Location
+                         , direction  :: Direction
+                         , lives      :: Int
+                         , mouthangle :: Float
                          }
     data Ghost = Blinky Location Direction GhostBehaviour Float
                | Pinky  Location Direction GhostBehaviour Float
