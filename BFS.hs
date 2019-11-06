@@ -10,8 +10,9 @@ module BFS where
 
 
     -- Implements the BFS Pathfinding algorithm in Haskell
-    findPath :: Maze -> Location -> Location -> Direction
-    findPath m l1 l2 = findPath' m l1 l2 (enqueue l1 EmptyQ) []
+    findPath :: Maze -> Location -> Location -> Direction -> Direction
+    findPath m l1 l2 currentDir | l1 == l2  = currentDir
+                                | otherwise = findPath' m l1 l2 (enqueue l1 EmptyQ) []
 
     findPath' :: Maze -> Location -> Location -> Queue Location -> [(Location, Location)] -> Direction
     findPath' m origin dest q disc | continue  = isdest dest l      -- check if we found it, if not: recursion

@@ -6,6 +6,8 @@ module Movable where
     import BFS
     import HelperFunctions
     import Initials
+
+    import System.Random
    
     {- 
         SHOW 
@@ -111,11 +113,12 @@ module Movable where
     aiStep gstate g@(Blinky loc dir gb ms) | isOnTile loc = Blinky loc newDir gb ms
                                            | otherwise    = g -- Cant change direction
                                            where 
-                                            (px, py) = location $ player gstate 
+                                            pacman   = player gstate
+                                            (px, py) = location pacman
                                             pacLoc   = (round' px, round' py)
                                             m        = maze gstate
-                                            newDir   | gb == Chase      = findPath m loc pacLoc
-                                                     | gb == Scatter    = findPath m loc $ scatterLocation g
+                                            newDir   | gb == Chase      = findPath m loc pacLoc dir
+                                                     | gb == Scatter    = findPath m loc (scatterLocation g) dir
                                                      | gb == Frightened = randomDirection m loc
     aiStep gstate g@(Pinky  loc dir gb ms) | isOnTile loc = Pinky loc newDir gb ms
                                            | otherwise    = g -- Cant change direction
@@ -124,11 +127,23 @@ module Movable where
                                             (px, py) = location pacman
                                             pacLoc   = (round' px, round' py)
                                             m        = maze gstate
-                                            newDir   | gb == Chase      = findPath m loc (shiftLocation (direction pacman) pacLoc 4)
-                                                     | gb == Scatter    = findPath m loc $ scatterLocation g
+                                            newDir   | gb == Chase      = findPath m loc (shiftLocation (direction pacman) pacLoc 4) dir
+                                                     | gb == Scatter    = findPath m loc (scatterLocation g) dir
                                                      | gb == Frightened = randomDirection m loc
     aiStep gstate g@(Inky   loc dir gb ms) = g
-    aiStep gstate g@(Clyde  loc dir gb ms) = g
+    aiStep gstate g@(Clyde  loc dir gb ms) | isOnTile loc = Clyde loc newDir gb' ms
+                                           | otherwise    = g -- Cant change direction
+                                           where 
+                                            pacman   = player gstate
+                                            (px, py) = location pacman
+                                            pacLoc   = (round' px, round' py)
+                                            m        = maze gstate
+                                            gb'      | distance loc pacLoc <= 8 = Scatter
+                                                     | otherwise                = Chase
+
+                                            newDir   | gb  == Frightened        = randomDirection m loc                     -- Frightened must be checked for first, or Clyde will never become frightened.
+                                                     | gb' == Chase             = findPath m loc pacLoc dir                    -- We all know Clyde never actually gets frightened, as he is the bravest ghost ever, but he pretends to be as to remain friends with the others.
+                                                     | gb' == Scatter           = findPath m loc (scatterLocation g) dir
 
     randomDirection :: Maze -> Location -> Direction
     randomDirection m loc = getDirection loc newLoc
