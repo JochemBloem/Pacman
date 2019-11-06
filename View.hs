@@ -14,7 +14,7 @@ module View where
                       Paused   -> Translate ((-1)*sx/2) 0 $ Scale 0.1 0.1 $ color blue $ Text $ show $ player gstate {-color blue (Translate ((-1)*sx/2) 0 $ Text "PAUSED")-}
                                 where 
                                   (sx, sy) = screenSizeF
-                      GameOn   -> Pictures (viewMaze (maze gstate) ++ viewGhosts (enemies gstate) ++ [viewPacman $ player gstate] )
+                      GameOn   -> Pictures (viewMaze (maze gstate) ++ viewGhosts (enemies gstate) ++ [viewPacman $ player gstate] ++ [viewHeaders gstate])
                       GameOver -> Scale 0.5 0.5 $ color red (Translate ((-1)*sx/2) 0 $ Text "GAME OVER")
                                 where 
                                   (sx, sy) = screenSizeF
@@ -34,9 +34,31 @@ module View where
                   where 
                     (dx, dy) = toScreenSpace i
                     w        = fieldSize / 2
-    viewField (Item,      i) = color yellow (Translate dx dy $ ThickCircle (scaledFieldSize 0.15 / 2) 1)
+    viewField (Empty,     i) = Blank
+    viewField (Energizer, i) = color yellow (Translate dx dy $ ThickCircle (scaledFieldSize 0.3  / 2) 1)
                   where 
                     (dx, dy) = toScreenSpace i
+    viewField (Dot,       i) = color yellow (Translate dx dy $ ThickCircle (scaledFieldSize 0.15 / 2) 1)
+                  where 
+                    (dx, dy) = toScreenSpace i
+    viewField (Fruit,     i) = color red (Translate dx dy $ rectangleWire fsize fsize)
+                  where 
+                    (dx, dy) = toScreenSpace i
+                    fsize = scaledFieldSize 0.7  / 2
+
+              
+    
+    {-
+        UI view functions
+     -}
+     
+    viewHeaders :: Gamestate -> Picture
+    viewHeaders (Gamestate _ (Pacman _ _ lives) _ _ score level _ _) = Translate dx dy $ scale' 0.2 $ color white $ Text headers
+                    where
+                      (x, y) = screenSizeF
+                      dx = (-1) * (x / 2) * 0.9
+                      dy =        (y / 2) * 0.88
+                      headers = "Lives: " ++ show lives ++ "  Score: " ++ show score ++ "  Level: " ++ show level
     {-
         Movable view functions
      -}
@@ -86,5 +108,8 @@ module View where
                                             ppf              = pixelsPerField
                                             nx               = ppf*x - (bsizex * ppf / 2)
                                             ny               = ppf*y - (bsizey * ppf / 2)
+
+    scale' :: Float -> Picture -> Picture
+    scale' f = Scale f f
 
     
