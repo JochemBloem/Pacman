@@ -2,7 +2,7 @@ module Main where
 
     import Controller
     import View
-    import General
+    import Initials
     import Types
     
     import Graphics.Gloss.Interface.IO.Game
@@ -16,4 +16,3 @@ module Main where
                   view             -- View  function
                   input            -- Event function
                   step             -- Step  function
-

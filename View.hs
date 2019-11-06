@@ -5,6 +5,7 @@ module View where
     import Graphics.Gloss
     import Types
     import Movable
+    import HelperFunctions
     
     view :: Gamestate -> IO Picture
     view  = return . viewPure

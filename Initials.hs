@@ -1,12 +1,10 @@
-module General where 
+module Initials where 
 
     {- 
         IMPORTS 
      -}
     import Types
-    import Movable
-    import System.IO
-    import Control.Monad
+
     {- 
         GAMESTATE 
      -}
@@ -15,7 +13,7 @@ module General where
     initialGameState = resetGameState 0 1
 
     resetGameState :: Int -> Int -> Gamestate
-    resetGameState score level = Gamestate almostEmptyMaze p initialEnemies d score level 0 GameOn
+    resetGameState score level = Gamestate initialMaze p initialEnemies d score level 0 GameOn
             where 
                 p@(Pacman _ d _) = initialPacman
     {- 
@@ -55,12 +53,32 @@ module General where
                         Wall, Empty, Wall, Wall, Wall, Empty, Wall, Wall, Wall, Empty, Wall, Wall, Wall, Empty, Wall,
                         Wall, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Wall,
                         Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall
-                    ]            
-
-
-    {-
-        GENERAL FUNCITONS
+                    ]   
+    {- 
+        PACMAN 
      -}
+    initialPacman :: Pacman
+    initialPacman = basePacman 3
     
-    -- toPoint :: Location -> Point
-    -- toPoint (x,y) = Point x y
+    initialPacmanLocation :: Location
+    initialPacmanLocation = (7,3)
+
+    initialPacmanDirection :: Direction
+    initialPacmanDirection = S 
+
+    basePacman :: Int -> Pacman
+    basePacman = resetPacman 1 
+
+    resetPacman :: Int -> Int -> Pacman
+    resetPacman level l = Pacman initialPacmanLocation initialPacmanDirection pacmanLives
+            where 
+                pacmanLives  | even level = l + 1
+                            | otherwise  = l
+
+    {- 
+        GHOSTS 
+     -}
+
+    initialEnemies :: [Ghost]
+    initialEnemies = [Blinky (7,10) W Chase 0, Pinky (7,7) S Chase 0, Inky (6,7) N Chase 0, Clyde (8,7) N Chase 0]
+          
