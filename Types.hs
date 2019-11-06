@@ -3,10 +3,8 @@ module Types where
         MAZE
     -}
     type Maze  = [Field]
-    data Field = Wall   | Spawn      | SpawnDoor | Item 
+    data Field = Wall | Spawn | SpawnDoor | Empty | Dot | Energizer | Fruit 
             deriving(Show, Eq)
-    data Item  = Empty  | Dot        | Energizer | Fruit
-    data Fruit = Cherry | Strawberry | Orange    | Apple | Melon | Galaxian | Bell | Key
 
     
     {-
@@ -88,6 +86,23 @@ module Types where
     {-
         HELPER FUNCTIONS
      -}
+
+    roundedLocation :: Location -> Location
+    roundedLocation (x,y) = (round' x, round' y)
+
+    getGhostLocation :: Ghost -> Location
+    getGhostLocation (Blinky l _ _ _) = l
+    getGhostLocation (Pinky  l _ _ _) = l
+    getGhostLocation (Inky   l _ _ _) = l
+    getGhostLocation (Clyde  l _ _ _) = l
+
+    setMazeField :: Maze -> Location -> Field -> Maze
+    setMazeField m loc f = take n m ++ [f] ++ drop (n + 1) m
+                    where
+                        n = locationToIndex loc
+
+    getField :: Maze -> Location -> Field
+    getField m l = m!!locationToIndex l 
 
     round' :: (RealFrac a, Num b) => a -> b
     round' = fromIntegral . round
