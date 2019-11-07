@@ -131,19 +131,17 @@ module Movable where
                                                      | gb == Scatter    = findPath m loc (scatterLocation g) dir
                                                      | gb == Frightened = randomDirection m loc
     aiStep gstate g@(Inky   loc dir gb ms) = g
-    aiStep gstate g@(Clyde  loc dir gb ms) | isOnTile loc = Clyde loc newDir gb' ms
+    aiStep gstate g@(Clyde  loc dir gb ms) | isOnTile loc = Clyde loc newDir gb ms
                                            | otherwise    = g -- Cant change direction
                                            where 
                                             pacman   = player gstate
                                             (px, py) = location pacman
                                             pacLoc   = (round' px, round' py)
                                             m        = maze gstate
-                                            gb'      | distance loc pacLoc <= 8 = Scatter
-                                                     | otherwise                = Chase
 
-                                            newDir   | gb  == Frightened        = randomDirection m loc                     -- Frightened must be checked for first, or Clyde will never become frightened.
-                                                     | gb' == Chase             = findPath m loc pacLoc dir                    -- We all know Clyde never actually gets frightened, as he is the bravest ghost ever, but he pretends to be as to remain friends with the others.
-                                                     | gb' == Scatter           = findPath m loc (scatterLocation g) dir
+                                            newDir   | gb  == Frightened                      = randomDirection m loc        
+                                                     | gb == Chase && distance loc pacLoc > 5 = findPath m loc pacLoc dir     
+                                                     | otherwise                              = findPath m loc (scatterLocation g) dir
 
     randomDirection :: Maze -> Location -> Direction
     randomDirection m loc = getDirection loc newLoc
@@ -155,7 +153,11 @@ module Movable where
     updateGhostTimers s = map (updateGhostTimer s)
 
     updateGhostTimer :: Float -> Ghost -> Ghost
-    updateGhostTimer secs (Blinky l d g t) = Blinky l d g (t + secs)
-    updateGhostTimer secs (Pinky  l d g t) = Pinky  l d g (t + secs)
-    updateGhostTimer secs (Inky   l d g t) = Inky   l d g (t + secs)
-    updateGhostTimer secs (Clyde  l d g t) = Clyde  l d g (t + secs)
+    updateGhostTimer secs (Blinky l d g t) = Blinky l d g (t + extraTime g secs)
+    updateGhostTimer secs (Pinky  l d g t) = Pinky  l d g (t + extraTime g secs)
+    updateGhostTimer secs (Inky   l d g t) = Inky   l d g (t + extraTime g secs)
+    updateGhostTimer secs (Clyde  l d g t) = Clyde  l d g (t + extraTime g secs)
+
+    extraTime :: GhostBehaviour -> Float -> Float
+    extraTime Frightened _ = 0
+    extraTime _          s = s
