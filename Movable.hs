@@ -130,7 +130,27 @@ module Movable where
                                             newDir   | gb == Chase      = findPath m loc (shiftLocation (direction pacman) pacLoc 4) dir
                                                      | gb == Scatter    = findPath m loc (scatterLocation g) dir
                                                      | gb == Frightened = randomDirection m loc
-    aiStep gstate g@(Inky   loc dir gb ms) = g
+    aiStep gstate g@(Inky   loc dir gb ms) | isOnTile loc = Inky loc newDir gb ms
+                                           | otherwise    = g -- Cant change direction
+                                           where 
+                                            pacman   = player gstate
+                                            (px, py) = location pacman
+                                            pacLoc   = (round' px, round' py)
+                                            m        = maze gstate
+                                            newDir   | gb == Chase      = findPath m loc inkyChaseLoc dir
+                                                     | gb == Scatter    = findPath m loc (scatterLocation g) dir
+                                                     | gb == Frightened = randomDirection m loc
+                                            
+                                            -- new location aim when chasing
+                                            inkyChaseLoc :: Location
+                                            inkyChaseLoc = (round' x, round' y)
+                                                    where 
+                                                        (Blinky (bix,biy) _ _ _) = enemies gstate !! 0
+                                                        (px,py) = pacLoc
+                                                        (bx,by) = (round' bix, round' biy)
+                                                        (x,y)   = (bix + (px - bix) * 2,biy + (py - biy) * 2)
+
+
     aiStep gstate g@(Clyde  loc dir gb ms) | isOnTile loc = Clyde loc newDir gb ms
                                            | otherwise    = g -- Cant change direction
                                            where 
