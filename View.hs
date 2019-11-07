@@ -13,9 +13,12 @@ module View where
 
     viewPure :: Gamestate -> Picture
     viewPure gstate = case status gstate of
-                      Paused   -> Translate ((-1)*sx/2) 0 $ Scale 0.1 0.1 $ color blue $ Text $ show $ player gstate {-color blue (Translate ((-1)*sx/2) 0 $ Text "PAUSED")-}
+                      Paused   ->  Pictures [header,body,footer]
                                 where 
                                   (sx, sy) = screenSizeF
+                                  header   = Scale 0.5 0.5 $ color blue (Translate ((-1)*sx/2) 0 $ Text "PAUSED")
+                                  body     = Scale 0.3 0.3 $ color blue (Translate ((-1)*sx) ((-1)*sy/2) $ Text "Press u to unpause")
+                                  footer   = Scale 0.2 0.2 $ color blue (Translate ((-1)*sx) ((-1)*sy) $ Text "Or press r to restart")
                       GameOn   -> Pictures (viewMaze (maze gstate) ++ viewGhosts (enemies gstate) ++ [viewPacman $ player gstate] ++ [viewHeaders gstate])
                       GameOver -> Scale 0.5 0.5 $ color red (Translate ((-1)*sx/2) 0 $ Text "GAME OVER")
                                 where 

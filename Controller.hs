@@ -104,8 +104,7 @@ module Controller where
     inputKey (EventKey (Char 'a') _ _ _) gstate = gstate { newDir = W }
     inputKey (EventKey (Char 's') _ _ _) gstate = gstate { newDir = S }
     inputKey (EventKey (Char 'd') _ _ _) gstate = gstate { newDir = E }
-    inputKey (EventKey (Char 'p') _ _ _) gstate | status gstate == Paused = gstate { status = GameOn }
-                                                | status gstate == GameOn = gstate { status = Paused }
-                                                | otherwise               = gstate { status = GameOver }
+    inputKey (EventKey (Char 'p') _ _ _) gstate = gstate { status = Paused }
+    inputKey (EventKey (Char 'u') _ _ _) gstate = gstate { status = GameOn }
     inputKey (EventKey (Char 'r') _ _ _) gstate = initialGameState
     inputKey _ gstate = gstate -- Otherwise keep the same
