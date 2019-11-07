@@ -48,11 +48,11 @@ module HelperFunctions where
     getGhostBehaviour (Inky   _ _ b _) = b
     getGhostBehaviour (Clyde  _ _ b _) = b
 
-    updateGhostBehaviour :: GhostBehaviour -> Ghost -> Ghost
-    updateGhostBehaviour b (Blinky loc dir _ t) = Blinky loc dir b t
-    updateGhostBehaviour b (Pinky  loc dir _ t) = Pinky  loc dir b t
-    updateGhostBehaviour b (Inky   loc dir _ t) = Inky   loc dir b t
-    updateGhostBehaviour b (Clyde  loc dir _ t) = Clyde  loc dir b t
+    setGhostBehaviour :: GhostBehaviour -> Ghost -> Ghost
+    setGhostBehaviour b (Blinky loc dir _ t) = Blinky loc dir b t
+    setGhostBehaviour b (Pinky  loc dir _ t) = Pinky  loc dir b t
+    setGhostBehaviour b (Inky   loc dir _ t) = Inky   loc dir b t
+    setGhostBehaviour b (Clyde  loc dir _ t) = Clyde  loc dir b t
 
     
     isEaten :: Location -> Ghost -> Bool

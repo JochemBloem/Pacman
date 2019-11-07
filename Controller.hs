@@ -30,7 +30,7 @@ module Controller where
           stat      = status  gstate
           notScaredGhosts = filter isNotScared ghosts
           eatenGhosts     = map (isEaten pacLoc) ghosts
-          newScore        = score gstate + 100000 * amountInList True eatenGhosts
+          newScore        = score gstate + 100000 * amountInList True eatenGhosts -- I think this should work @TODO @HEELP
 
           -- updated pacman
           newPacman = move newPacman' m
@@ -43,7 +43,9 @@ module Controller where
 
           -- updated ghosts
           newGhosts   | pacmanDies = initialEnemies
-                      | otherwise  = updateGhostTimers secs (map (`move` m) (aiSteps gstate $ enemies gstate) )
+                      | otherwise  = updateGhostTimers secs (map (`move` m) (aiSteps gstate behaveGhosts) )
+                            where
+                              behaveGhosts = map updateGhostBehaviour ghosts
           
           -- updated score and maze
           newGstate   | isOnTile pacLoc = updateGstate pacLoc
@@ -76,7 +78,7 @@ module Controller where
                             clearLoc = setField m loc Empty
 
                             scaredGhosts :: [Ghost]
-                            scaredGhosts = map (updateGhostBehaviour Frightened) (enemies gstate)
+                            scaredGhosts = map (setGhostBehaviour Frightened) (enemies gstate)
                             
           mazeEmpty :: Bool --     Allowed : Wall Spawn SpawnDoor Empty Fruit
                             -- Not Allowed : Energizer Dot

@@ -184,3 +184,12 @@ module Movable where
     extraTime :: GhostBehaviour -> Float -> Float
     extraTime Frightened _ = 0
     extraTime _          s = s
+
+    updateGhostBehaviour:: Ghost -> Ghost
+    updateGhostBehaviour g@(Blinky l d _ t) | modded > 7  = Blinky l d Scatter t 
+                                            | otherwise   = Blinky l d Chase   t 
+                where
+                    modded = round' t `mod` round' 10 
+    updateGhostBehaviour (Pinky  l d g t) = Pinky  l d g t 
+    updateGhostBehaviour (Inky   l d g t) = Inky   l d g t
+    updateGhostBehaviour (Clyde  l d g t) = Clyde  l d g t 
