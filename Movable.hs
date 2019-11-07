@@ -6,8 +6,7 @@ module Movable where
     import BFS
     import HelperFunctions
     import Initials
-
-    import System.Random
+    import RandomNumber
    
     {- 
         SHOW 
@@ -24,13 +23,13 @@ module Movable where
     instance Show Pacman where
         show (Pacman lo d li _) = "Pacman:\n    Location:  " ++ show lo ++ "\n    Direction: " ++ show d ++ "\n    Lives:     " ++ show li ++ "\n" 
     instance Show Ghost where
-        show (Blinky l d g t)  = stringifyGhost "Blinky" l d g t
-        show (Pinky  l d g t)  = stringifyGhost "Pinky"  l d g t
-        show (Inky   l d g t)  = stringifyGhost "Inky"   l d g t
-        show (Clyde  l d g t)  = stringifyGhost "Clyde"  l d g t
+        show (Blinky l d g t i)  = stringifyGhost "Blinky" l d g t i
+        show (Pinky  l d g t i)  = stringifyGhost "Pinky"  l d g t i
+        show (Inky   l d g t i)  = stringifyGhost "Inky"   l d g t i
+        show (Clyde  l d g t i)  = stringifyGhost "Clyde"  l d g t i
     
-    stringifyGhost :: String -> Location -> Direction -> GhostBehaviour -> Float -> String
-    stringifyGhost name loc dir gb ms = name ++ "\n    " ++ "Location:       " ++ show loc ++ "\n    Direction:      " ++ show dir ++ "\n    Behaviour:      " ++ show gb ++ "\n    Internal clock: " ++ show ms ++ "ms"
+    stringifyGhost :: String -> Location -> Direction -> GhostBehaviour -> Float -> Int -> String
+    stringifyGhost name loc dir gb ms i = name ++ "\n    " ++ "Location:       " ++ show loc ++ "\n    Direction:      " ++ show dir ++ "\n    Behaviour:      " ++ show gb ++ "\n    Internal clock: " ++ show ms ++ "s\n    rndindex:    " ++ show i
         
     {- 
         MOVABLE 
@@ -54,22 +53,22 @@ module Movable where
     
     instance Movable Ghost where
         -- change ghost directions
-        changeDirection (Blinky l _ g t) d _ = Blinky l d g t
-        changeDirection (Pinky  l _ g t) d _ = Pinky  l d g t
-        changeDirection (Inky   l _ g t) d _ = Inky   l d g t
-        changeDirection (Clyde  l _ g t) d _ = Clyde  l d g t
+        changeDirection (Blinky l _ g t i) d _ = Blinky l d g t i
+        changeDirection (Pinky  l _ g t i) d _ = Pinky  l d g t i
+        changeDirection (Inky   l _ g t i) d _ = Inky   l d g t i
+        changeDirection (Clyde  l _ g t i) d _ = Clyde  l d g t i
         -- move ghosts
-        move g@(Blinky l@(x, y) d gb t) m  | ghostAccessible targetField = Blinky targetLoc             d gb t
-                                           | otherwise                   = Blinky (round' x, round' y)  d gb t
+        move g@(Blinky l@(x, y) d gb t i) m  | ghostAccessible targetField = Blinky targetLoc             d gb t i
+                                             | otherwise                   = Blinky (round' x, round' y)  d gb t i
             where (targetLoc, targetField) = getTargetTile m l d
-        move g@(Pinky  l@(x, y) d gb t) m  | ghostAccessible targetField = Pinky  targetLoc            d gb t
-                                           | otherwise                   = Pinky  (round' x, round' y) d gb t
+        move g@(Pinky  l@(x, y) d gb t i) m  | ghostAccessible targetField = Pinky  targetLoc            d gb t i
+                                             | otherwise                   = Pinky  (round' x, round' y) d gb t i
             where (targetLoc, targetField) = getTargetTile m l d
-        move g@(Inky   l@(x, y) d gb t) m  | ghostAccessible targetField = Inky   targetLoc            d gb t
-                                           | otherwise                   = Inky   (round' x, round' y) d gb t
+        move g@(Inky   l@(x, y) d gb t i) m  | ghostAccessible targetField = Inky   targetLoc            d gb t i
+                                             | otherwise                   = Inky   (round' x, round' y) d gb t i
             where (targetLoc, targetField) = getTargetTile m l d
-        move g@(Clyde  l@(x, y) d gb t) m  | ghostAccessible targetField = Clyde  targetLoc            d gb t
-                                           | otherwise                   = Clyde  (round' x, round' y) d gb t
+        move g@(Clyde  l@(x, y) d gb t i) m  | ghostAccessible targetField = Clyde  targetLoc            d gb t i
+                                             | otherwise                   = Clyde  (round' x, round' y) d gb t i
             where (targetLoc, targetField) = getTargetTile m l d
 
     getTargetTile :: Maze -> Location -> Direction -> TargetTile
@@ -110,9 +109,10 @@ module Movable where
     aiSteps gstate = map (aiStep gstate)
     
     aiStep :: Gamestate -> Ghost -> Ghost
-    aiStep gstate g@(Blinky loc dir gb ms) | isEaten pacLoc g = baseBlinky ms
-                                           | isOnTile loc     = Blinky loc newDir gb ms
-                                           | otherwise        = g -- Cant change direction
+    aiStep gstate g@(Blinky loc dir gb ms i)| isEaten pacLoc g                 = baseBlinky ms
+                                            | gb == Frightened && isOnTile loc = randomDirection g m loc
+                                            | isOnTile loc                     = Blinky loc newDir gb ms i
+                                            | otherwise                        = g -- Cant change direction
                                            where 
                                             pacman   = player gstate
                                             (px, py) = location pacman
@@ -120,10 +120,10 @@ module Movable where
                                             m        = maze gstate
                                             newDir   | gb == Chase      = findPath m loc pacLoc dir
                                                      | gb == Scatter    = findPath m loc (scatterLocation g) dir
-                                                     | gb == Frightened = randomDirection m loc
-    aiStep gstate g@(Pinky  loc dir gb ms) | isEaten pacLoc g = basePinky ms
-                                           | isOnTile loc = Pinky loc newDir gb ms
-                                           | otherwise    = g -- Cant change direction
+    aiStep gstate g@(Pinky  loc dir gb ms i)| isEaten pacLoc g                 = basePinky ms
+                                            | gb == Frightened && isOnTile loc = randomDirection g m loc
+                                            | isOnTile loc                     = Pinky loc newDir gb ms i
+                                            | otherwise                        = g -- Cant change direction
                                            where 
                                             pacman   = player gstate
                                             (px, py) = location pacman
@@ -131,10 +131,10 @@ module Movable where
                                             m        = maze gstate
                                             newDir   | gb == Chase      = findPath m loc (shiftLocation (direction pacman) pacLoc 4) dir
                                                      | gb == Scatter    = findPath m loc (scatterLocation g) dir
-                                                     | gb == Frightened = randomDirection m loc
-    aiStep gstate g@(Inky   loc dir gb ms) | isEaten pacLoc g = baseInky ms
-                                           | isOnTile loc = Inky loc newDir gb ms
-                                           | otherwise    = g -- Cant change direction
+    aiStep gstate g@(Inky   loc dir gb ms i)| isEaten pacLoc g                 = baseInky ms
+                                            | gb == Frightened && isOnTile loc = randomDirection g m loc
+                                            | isOnTile loc                     = Inky loc newDir gb ms i
+                                            | otherwise                        = g -- Cant change direction
                                            where 
                                             pacman   = player gstate
                                             (px, py) = location pacman
@@ -142,36 +142,38 @@ module Movable where
                                             m        = maze gstate
                                             newDir   | gb == Chase      = findPath m loc inkyChaseLoc dir
                                                      | gb == Scatter    = findPath m loc (scatterLocation g) dir
-                                                     | gb == Frightened = randomDirection m loc
                                             
                                             -- new location aim when chasing
                                             inkyChaseLoc :: Location
                                             inkyChaseLoc = (round' x, round' y)
                                                     where 
-                                                        (Blinky (bix,biy) _ _ _) = head (enemies gstate) -- gstate always contains enemies, if not a crash is fine
+                                                        (Blinky (bix,biy) _ _ _ _) = head (enemies gstate) -- gstate always contains enemies, if not a crash is fine
                                                         (px,py) = pacLoc
                                                         (bx,by) = (round' bix, round' biy)
                                                         (x,y)   = (bix + (px - bix) * 2,biy + (py - biy) * 2)
 
 
-    aiStep gstate g@(Clyde  loc dir gb ms) | isEaten pacLoc g = baseClyde ms
-                                           | isOnTile loc = Clyde loc newDir gb ms
-                                           | otherwise    = g -- Cant change direction
+    aiStep gstate g@(Clyde  loc dir gb ms i)| isEaten pacLoc g                 = baseClyde ms
+                                            | gb == Frightened && isOnTile loc = randomDirection g m loc        
+                                            | isOnTile loc                     = Clyde loc newDir gb ms i
+                                            | otherwise                        = g -- Cant change direction
                                            where 
                                             pacman   = player gstate
                                             (px, py) = location pacman
                                             pacLoc   = (round' px, round' py)
                                             m        = maze gstate
 
-                                            newDir   | gb == Frightened                       = randomDirection m loc        
-                                                     | gb == Chase && distance loc pacLoc > 5 = findPath m loc pacLoc dir     
+                                            newDir   | gb == Chase && distance loc pacLoc > 5 = findPath m loc pacLoc dir     
                                                      | otherwise                              = findPath m loc (scatterLocation g) dir
 
-    randomDirection :: Maze -> Location -> Direction
-    randomDirection m loc = getDirection loc newLoc
+    randomDirection :: Ghost -> Maze -> Location -> Ghost
+    randomDirection g m loc = setGhostDirection newDir ng
                         where
-                            nbs    = accessibleNeighbours m loc
-                            newLoc = nbs!!getRandomNumber 0 (length nbs)
+                            nbs        = accessibleNeighbours m loc
+                            (index, ng)= newRnd g (length nbs - 1)
+                            newLoc     = nbs!!index
+                            newDir     = getDirection loc newLoc
+
 
 
     
@@ -179,10 +181,10 @@ module Movable where
     updateGhostTimers s = map (updateGhostTimer s)
 
     updateGhostTimer :: Float -> Ghost -> Ghost
-    updateGhostTimer secs (Blinky l d g t) = Blinky l d g (t + extraTime g secs)
-    updateGhostTimer secs (Pinky  l d g t) = Pinky  l d g (t + extraTime g secs)
-    updateGhostTimer secs (Inky   l d g t) = Inky   l d g (t + extraTime g secs)
-    updateGhostTimer secs (Clyde  l d g t) = Clyde  l d g (t + extraTime g secs)
+    updateGhostTimer secs (Blinky l d g t i) = Blinky l d g (t + extraTime g secs) i
+    updateGhostTimer secs (Pinky  l d g t i) = Pinky  l d g (t + extraTime g secs) i
+    updateGhostTimer secs (Inky   l d g t i) = Inky   l d g (t + extraTime g secs) i
+    updateGhostTimer secs (Clyde  l d g t i) = Clyde  l d g (t + extraTime g secs) i
 
     extraTime :: GhostBehaviour -> Float -> Float
     extraTime Frightened _ = 0

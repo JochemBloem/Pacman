@@ -5,7 +5,6 @@ module HelperFunctions where
     import Types
     import Data.List (sortBy)
     import Data.Function (on)
-    import System.Random
 
     {-
         MOVABLE
@@ -34,31 +33,37 @@ module HelperFunctions where
     ghostAccessible _    = True
 
     getGhostLocation :: Ghost -> Location
-    getGhostLocation (Blinky l _ _ _) = l
-    getGhostLocation (Pinky  l _ _ _) = l
-    getGhostLocation (Inky   l _ _ _) = l
-    getGhostLocation (Clyde  l _ _ _) = l
+    getGhostLocation (Blinky l _ _ _ _) = l
+    getGhostLocation (Pinky  l _ _ _ _) = l
+    getGhostLocation (Inky   l _ _ _ _) = l
+    getGhostLocation (Clyde  l _ _ _ _) = l
+
+    setGhostDirection :: Direction -> Ghost -> Ghost
+    setGhostDirection d (Blinky loc _ b t i) = Blinky loc d b t i
+    setGhostDirection d (Pinky  loc _ b t i) = Pinky  loc d b t i
+    setGhostDirection d (Inky   loc _ b t i) = Inky   loc d b t i
+    setGhostDirection d (Clyde  loc _ b t i) = Clyde  loc d b t i
 
     getGhostTime :: Ghost -> Float
-    getGhostTime (Blinky _ _ _ t) = t
-    getGhostTime (Pinky  _ _ _ t) = t
-    getGhostTime (Inky   _ _ _ t) = t
-    getGhostTime (Clyde  _ _ _ t) = t
+    getGhostTime (Blinky _ _ _ t _) = t
+    getGhostTime (Pinky  _ _ _ t _) = t
+    getGhostTime (Inky   _ _ _ t _) = t
+    getGhostTime (Clyde  _ _ _ t _) = t
 
     isNotScared :: Ghost -> Bool
     isNotScared g = getGhostBehaviour g /= Frightened
 
     getGhostBehaviour :: Ghost -> GhostBehaviour
-    getGhostBehaviour (Blinky _ _ b _) = b
-    getGhostBehaviour (Pinky  _ _ b _) = b
-    getGhostBehaviour (Inky   _ _ b _) = b
-    getGhostBehaviour (Clyde  _ _ b _) = b
+    getGhostBehaviour (Blinky _ _ b _ _) = b
+    getGhostBehaviour (Pinky  _ _ b _ _) = b
+    getGhostBehaviour (Inky   _ _ b _ _) = b
+    getGhostBehaviour (Clyde  _ _ b _ _) = b
 
     setGhostBehaviour :: GhostBehaviour -> Ghost -> Ghost
-    setGhostBehaviour b (Blinky loc dir _ t) = Blinky loc dir b t
-    setGhostBehaviour b (Pinky  loc dir _ t) = Pinky  loc dir b t
-    setGhostBehaviour b (Inky   loc dir _ t) = Inky   loc dir b t
-    setGhostBehaviour b (Clyde  loc dir _ t) = Clyde  loc dir b t
+    setGhostBehaviour b (Blinky loc dir _ t i) = Blinky loc dir b t i
+    setGhostBehaviour b (Pinky  loc dir _ t i) = Pinky  loc dir b t i
+    setGhostBehaviour b (Inky   loc dir _ t i) = Inky   loc dir b t i
+    setGhostBehaviour b (Clyde  loc dir _ t i) = Clyde  loc dir b t i
 
     
     isEaten :: Location -> Ghost -> Bool
@@ -137,6 +142,3 @@ module HelperFunctions where
     amountInList _ []     = 0
     amountInList n (x:xs) | x == n    = 1 + amountInList n xs
                           | otherwise =     amountInList n xs
-
-    getRandomNumber :: Int -> Int -> Int
-    getRandomNumber lowerLimit upperLimit = lowerLimit -- @TODOJOCHEM: actueel willekeurig getal  

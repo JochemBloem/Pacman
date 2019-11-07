@@ -12,9 +12,9 @@ module Controller where
     
     -- | Handle one iteration of the game
     step :: Float -> Gamestate -> IO Gamestate
-    step _ gstate@(Gamestate _ _ _ _ _ _ _ Paused)                        = return gstate
-    step secs gstate | stat == Paused || stat == GameOver                 = return gstate
-                     | mazeEmpty                                          = return $ (resetGameState (score newGstate + 500) (lvl + 1))  { player = resetPacman lvl (lives $ player gstate) }
+    step _ gstate@(Gamestate _ _ _ _ _ _ _ Paused)                      = return gstate
+    step _ gstate@(Gamestate _ _ _ _ _ _ _ GameOver)                    = return gstate
+    step secs gstate | mazeEmpty                                          = return $ (resetGameState (score newGstate + 500) (lvl + 1))  { player = resetPacman lvl (lives $ player gstate) }
                      | elapsedTime gstate + secs > nO_SECS_BETWEEN_CYCLES = return $ finalGstate { elapsedTime = 0
                                                                                                  , enemies     = newGhosts
                                                                                                  }
@@ -106,5 +106,6 @@ module Controller where
     inputKey (EventKey (Char 'd') _ _ _) gstate = gstate { newDir = E }
     inputKey (EventKey (Char 'p') _ _ _) gstate = gstate { status = Paused }
     inputKey (EventKey (Char 'u') _ _ _) gstate = gstate { status = GameOn }
+    inputKey (EventKey (Char 'g') _ _ _) gstate = gstate { status = GameOver } -- @TODO: remove, just for debug sake
     inputKey (EventKey (Char 'r') _ _ _) gstate = initialGameState
     inputKey _ gstate = gstate -- Otherwise keep the same

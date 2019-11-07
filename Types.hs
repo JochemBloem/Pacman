@@ -35,10 +35,10 @@ module Types where
                          , lives      :: Int
                          , mouthangle :: Float
                          }
-    data Ghost = Blinky Location Direction GhostBehaviour Float
-               | Pinky  Location Direction GhostBehaviour Float
-               | Inky   Location Direction GhostBehaviour Float
-               | Clyde  Location Direction GhostBehaviour Float
+    data Ghost = Blinky Location Direction GhostBehaviour Float Int
+               | Pinky  Location Direction GhostBehaviour Float Int
+               | Inky   Location Direction GhostBehaviour Float Int
+               | Clyde  Location Direction GhostBehaviour Float Int
             deriving (Eq)
     -- instance (Eq) => Eq Ghost where
     --     Blinky{} == Blinky{} = True
