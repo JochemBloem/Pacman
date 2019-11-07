@@ -39,6 +39,12 @@ module HelperFunctions where
     getGhostLocation (Inky   l _ _ _) = l
     getGhostLocation (Clyde  l _ _ _) = l
 
+    getGhostTime :: Ghost -> Float
+    getGhostTime (Blinky _ _ _ t) = t
+    getGhostTime (Pinky  _ _ _ t) = t
+    getGhostTime (Inky   _ _ _ t) = t
+    getGhostTime (Clyde  _ _ _ t) = t
+
     isNotScared :: Ghost -> Bool
     isNotScared g = getGhostBehaviour g /= Frightened
 

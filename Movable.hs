@@ -110,7 +110,7 @@ module Movable where
     aiSteps gstate = map (aiStep gstate)
     
     aiStep :: Gamestate -> Ghost -> Ghost
-    aiStep gstate g@(Blinky loc dir gb ms) | isEaten pacLoc g = initialBlinky -- @TODO: for all ghosts
+    aiStep gstate g@(Blinky loc dir gb ms) | isEaten pacLoc g = baseBlinky ms
                                            | isOnTile loc     = Blinky loc newDir gb ms
                                            | otherwise        = g -- Cant change direction
                                            where 
@@ -121,7 +121,8 @@ module Movable where
                                             newDir   | gb == Chase      = findPath m loc pacLoc dir
                                                      | gb == Scatter    = findPath m loc (scatterLocation g) dir
                                                      | gb == Frightened = randomDirection m loc
-    aiStep gstate g@(Pinky  loc dir gb ms) | isOnTile loc = Pinky loc newDir gb ms
+    aiStep gstate g@(Pinky  loc dir gb ms) | isEaten pacLoc g = basePinky ms
+                                           | isOnTile loc = Pinky loc newDir gb ms
                                            | otherwise    = g -- Cant change direction
                                            where 
                                             pacman   = player gstate
@@ -131,7 +132,8 @@ module Movable where
                                             newDir   | gb == Chase      = findPath m loc (shiftLocation (direction pacman) pacLoc 4) dir
                                                      | gb == Scatter    = findPath m loc (scatterLocation g) dir
                                                      | gb == Frightened = randomDirection m loc
-    aiStep gstate g@(Inky   loc dir gb ms) | isOnTile loc = Inky loc newDir gb ms
+    aiStep gstate g@(Inky   loc dir gb ms) | isEaten pacLoc g = baseInky ms
+                                           | isOnTile loc = Inky loc newDir gb ms
                                            | otherwise    = g -- Cant change direction
                                            where 
                                             pacman   = player gstate
@@ -152,7 +154,8 @@ module Movable where
                                                         (x,y)   = (bix + (px - bix) * 2,biy + (py - biy) * 2)
 
 
-    aiStep gstate g@(Clyde  loc dir gb ms) | isOnTile loc = Clyde loc newDir gb ms
+    aiStep gstate g@(Clyde  loc dir gb ms) | isEaten pacLoc g = baseClyde ms
+                                           | isOnTile loc = Clyde loc newDir gb ms
                                            | otherwise    = g -- Cant change direction
                                            where 
                                             pacman   = player gstate
@@ -186,10 +189,8 @@ module Movable where
     extraTime _          s = s
 
     updateGhostBehaviour:: Ghost -> Ghost
-    updateGhostBehaviour g@(Blinky l d _ t) | modded > 7  = Blinky l d Scatter t 
-                                            | otherwise   = Blinky l d Chase   t 
+    updateGhostBehaviour g | getGhostBehaviour g == Frightened  = g
+                           | modded > round' chaseTime          = setGhostBehaviour Scatter g
+                           | otherwise                          = setGhostBehaviour Chase   g
                 where
-                    modded = round' t `mod` round' 10 
-    updateGhostBehaviour (Pinky  l d g t) = Pinky  l d g t 
-    updateGhostBehaviour (Inky   l d g t) = Inky   l d g t
-    updateGhostBehaviour (Clyde  l d g t) = Clyde  l d g t 
+                    modded = round' (getGhostTime g) `mod` round' (chaseTime + scatterTime) 

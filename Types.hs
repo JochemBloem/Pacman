@@ -75,3 +75,9 @@ module Types where
 
     defLoc :: Location
     defLoc = (-1,-1)
+
+    chaseTime :: Float
+    chaseTime = 3
+
+    scatterTime :: Float
+    scatterTime = 7
