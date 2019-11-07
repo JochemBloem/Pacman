@@ -110,8 +110,9 @@ module Movable where
     aiSteps gstate = map (aiStep gstate)
     
     aiStep :: Gamestate -> Ghost -> Ghost
-    aiStep gstate g@(Blinky loc dir gb ms) | isOnTile loc = Blinky loc newDir gb ms
-                                           | otherwise    = g -- Cant change direction
+    aiStep gstate g@(Blinky loc dir gb ms) | isEaten pacLoc g = initialBlinky -- @TODO: for all ghosts
+                                           | isOnTile loc     = Blinky loc newDir gb ms
+                                           | otherwise        = g -- Cant change direction
                                            where 
                                             pacman   = player gstate
                                             (px, py) = location pacman
@@ -145,7 +146,7 @@ module Movable where
                                             inkyChaseLoc :: Location
                                             inkyChaseLoc = (round' x, round' y)
                                                     where 
-                                                        (Blinky (bix,biy) _ _ _) = enemies gstate !! 0
+                                                        (Blinky (bix,biy) _ _ _) = head (enemies gstate) -- gstate always contains enemies, if not a crash is fine
                                                         (px,py) = pacLoc
                                                         (bx,by) = (round' bix, round' biy)
                                                         (x,y)   = (bix + (px - bix) * 2,biy + (py - biy) * 2)
@@ -159,7 +160,7 @@ module Movable where
                                             pacLoc   = (round' px, round' py)
                                             m        = maze gstate
 
-                                            newDir   | gb  == Frightened                      = randomDirection m loc        
+                                            newDir   | gb == Frightened                       = randomDirection m loc        
                                                      | gb == Chase && distance loc pacLoc > 5 = findPath m loc pacLoc dir     
                                                      | otherwise                              = findPath m loc (scatterLocation g) dir
 
@@ -168,6 +169,8 @@ module Movable where
                         where
                             nbs    = accessibleNeighbours m loc
                             newLoc = nbs!!getRandomNumber 0 (length nbs)
+
+
     
     updateGhostTimers :: Float -> [Ghost] -> [Ghost]
     updateGhostTimers s = map (updateGhostTimer s)

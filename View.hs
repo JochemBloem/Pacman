@@ -60,7 +60,7 @@ module View where
                       (x, y) = screenSizeF
                       dx = (-1) * (x / 2) * 0.9
                       dy =        (y / 2) * 0.88
-                      headers = "Lives: " ++ show lives ++ "  Score: " ++ show score ++ "  Level: " ++ show level ++ "  Bclock: " ++ show s
+                      headers = "Lives: " ++ show lives ++ "  Score: " ++ show score ++ "  Level: " ++ show level ++ " ibc" ++ show s
     {-
         Movable view functions
      -}
@@ -79,10 +79,22 @@ module View where
     viewGhosts = map viewGhost
 
     viewGhost :: Ghost -> Picture
-    viewGhost (Blinky loc dir _ _) = color (makeColorI 255 0   0   255) $ ghostPicture loc dir
-    viewGhost (Pinky  loc dir _ _) = color (makeColorI 255 184 255 255) $ ghostPicture loc dir
-    viewGhost (Inky   loc dir _ _) = color (makeColorI 0   255 255 255) $ ghostPicture loc dir
-    viewGhost (Clyde  loc dir _ _) = color (makeColorI 255 184 82  255) $ ghostPicture loc dir
+    viewGhost (Blinky loc dir gb _) = color c $ ghostPicture loc dir
+                                   where
+                                    c | gb == Frightened = makeColorI 33  33  255 255
+                                      | otherwise        = makeColorI 255 0   0   255
+    viewGhost (Pinky  loc dir gb _) = color c $ ghostPicture loc dir
+                                   where
+                                    c | gb == Frightened = makeColorI 33  33  255 255
+                                      | otherwise        = makeColorI 255 184 255 255
+    viewGhost (Inky   loc dir gb _) = color c $ ghostPicture loc dir
+                                   where
+                                    c | gb == Frightened = makeColorI 33  33  255 255
+                                      | otherwise        = makeColorI 0   255 255 255
+    viewGhost (Clyde  loc dir gb _) = color c $ ghostPicture loc dir
+                                   where
+                                    c | gb == Frightened = makeColorI 33  33  255 255
+                                      | otherwise        = makeColorI 255 184 82  255
 
     ghostPicture :: Location -> Direction -> Picture
     ghostPicture loc dir = Translate dx dy $ Pictures [ arcSolid 0 180 (fieldSize / 3), polygon path, eye1, eye2]
@@ -96,10 +108,10 @@ module View where
                               u1         = 0.33 * hwidth
                               u2         = 2*u1
                               eyespacing = 0.5*hwidth
-                              eye1       = Translate (-eyespacing) 0 $ rotate' dir eye
-                              eye2       = Translate   eyespacing  0 $ rotate' dir eye
 
                               -- eyes
+                              eye1       = Translate (-eyespacing) 0 $ rotate' dir eye
+                              eye2       = Translate   eyespacing  0 $ rotate' dir eye
                               
                               eye :: Picture
                               eye = Pictures [ color white $ circleSolid eyesize, Translate 0 (eyesize - pupilsize) $ color black $ circleSolid pupilsize ]

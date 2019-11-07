@@ -19,14 +19,14 @@ module Types where
                                 ,   elapsedTime    :: Float
                                 ,   status         :: Status
                                 }
-    data Status = Paused | GameOn | GameOver
+    data Status = Paused | GameOn | GameOver deriving (Eq)
 
     {-
         MOVABLE
      -}
     type Location   = (Float, Float)
     type TargetTile = (Location, Field)
-    data Direction  = N | E | S | W
+    data Direction  = N | E | S | W deriving (Eq)
     {-
         CHARACTERS
      -}
@@ -39,6 +39,13 @@ module Types where
                | Pinky  Location Direction GhostBehaviour Float
                | Inky   Location Direction GhostBehaviour Float
                | Clyde  Location Direction GhostBehaviour Float
+            deriving (Eq)
+    -- instance (Eq) => Eq Ghost where
+    --     Blinky{} == Blinky{} = True
+    --     Pinky{}  == Pinky{}  = True
+    --     Inky{}   == Inky{}   = True
+    --     Clyde{}  == Clyde{}  = True
+    --     _        == _        = False
           
     data GhostBehaviour = Chase | Frightened | Scatter
             deriving(Eq)

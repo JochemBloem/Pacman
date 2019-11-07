@@ -80,7 +80,20 @@ module Initials where
      -}
 
     initialEnemies :: [Ghost]
-    initialEnemies = [Blinky (7,10) W Chase 0, Pinky (7,7) S Chase 0, Inky (6,7) N Chase 0, Clyde (8,7) N Chase 0]
+    --initialEnemies = [Blinky (7,10) W Chase 0, Pinky (7,7) S Chase 0, Inky (6,7) N Chase 0, Clyde (8,7) N Chase 0]
+    initialEnemies = [Blinky (7,10) W Chase 0]
+
+    initialBlinky :: Ghost
+    initialBlinky = Blinky (7,10) W Chase 0 
+
+    -- initialPlinky :: Ghost
+    -- initialBlinky = Pinky (7,7) S Chase 0
+
+    -- initialInky :: Ghost
+    -- initialBlinky = Inky (6,7) N Chase 0
+
+    -- initialClyde :: Ghost
+    -- initialBlinky = Clyde (8,7) N Chase 0
 
     -- Scatter locations
     scatterLocation :: Ghost -> Location
