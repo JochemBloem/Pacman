@@ -18,7 +18,7 @@ module RandomNumber where
             getRnd index | number <= upperlimit = number
                          | otherwise            = getRnd (index + gs)
                 where 
-                    number = randomList!!index
+                    number = randomList!!(index `mod` length randomList)
 
             getGhostInfo :: Ghost -> (Int, Int)
             getGhostInfo (Blinky _ _ _ _ i) = (i,2) 

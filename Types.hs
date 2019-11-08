@@ -56,8 +56,8 @@ module Types where
 
     nO_SECS_BETWEEN_CYCLES :: Float
     nO_SECS_BETWEEN_CYCLES = 0.05
-     
-    movableSpeed :: Float
+    
+    movableSpeed :: Float -- @TODO: make pacman speed different
     movableSpeed = 0.125 -- 1 devided by pacmanspeed must be an integer
 
     pixelsPerField :: Float
@@ -77,7 +77,7 @@ module Types where
     defLoc = (-1,-1)
 
     chaseTime :: Float
-    chaseTime = 3
+    chaseTime = 20
 
     scatterTime :: Float
     scatterTime = 7
