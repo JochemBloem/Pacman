@@ -12,25 +12,27 @@ module Controller where
     
     -- | Handle one iteration of the game
     step :: Float -> Gamestate -> IO Gamestate
-    step _ gstate@(Gamestate _ _ _ _ _ _ _ Paused _)                      = return gstate
+    step _ gstate@(Gamestate _ _ _ _ _ _ _ Paused   _)                    = return gstate
     step _ gstate@(Gamestate _ _ _ _ _ _ _ GameOver _)                    = return gstate -- @TODO: filesystem
     step secs gstate | mazeEmpty                                          = return $ (resetGameState (score newGstate + 500) (lvl + 1))  { player = resetPacman lvl (lives $ player gstate) }
                      | elapsedTime gstate + secs > nO_SECS_BETWEEN_CYCLES = return $ ult finalGstate { elapsedTime = 0
                                                                                                      , enemies     = newGhosts
+                                                                                                     , score       = newScore + 300 * length eatenGhosts
                                                                                                      }
                      | otherwise                                          = return $ ult newGstate   { elapsedTime = elapsedTime gstate + secs 
+                                                                                                     --, score       = oldScore
                                                                                                      }
         where  
           -- often used variables
-          pacman    = player  gstate
-          pacLoc    = location pacman
-          m         = maze    gstate
-          ghosts    = enemies gstate
-          lvl       = level   gstate
-          stat      = status  gstate
-          notScaredGhosts = filter isNotScared ghosts
-          eatenGhosts     = map (isEaten pacLoc) ghosts
-          newScore        = score gstate + 100000 * amountInList True eatenGhosts -- I think this should work @TODO @HEELP
+          pacman          = player   gstate
+          pacLoc          = location pacman
+          m               = maze     gstate
+          ghosts          = enemies  gstate
+          lvl             = level    gstate
+          stat            = status   gstate
+          notScaredGhosts = filter isNotScared      ghosts
+          eatenGhosts     = filter (isEaten pacLoc) ghosts
+          newScore        = score gstate-- + 300 * length eatenGhosts -- I think this should work @TODO @HEELP
           ult             = flip updateLevelTimer secs
 
           -- updated pacman

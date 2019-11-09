@@ -67,10 +67,11 @@ module HelperFunctions where
 
     
     isEaten :: Location -> Ghost -> Bool
-    isEaten pacLoc g = pacLoc == roundLoc gLoc && gb == Frightened
+    isEaten pacLoc g = pLoc == roundLoc gLoc && gb == Frightened
             where
                 gb   = getGhostBehaviour g
                 gLoc = roundLoc (getGhostLocation g)
+                pLoc = roundLoc pacLoc
     
     frighten :: Ghost -> Float -> Ghost
     frighten (Blinky loc dir _ t i _) = Blinky loc dir Frightened t i
