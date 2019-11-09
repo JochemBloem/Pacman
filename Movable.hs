@@ -169,11 +169,28 @@ module Movable where
     randomDirection :: Ghost -> Maze -> Location -> Ghost
     randomDirection g m loc = changeDirection ng newDir m
                         where
-                            -- @TODO check if l;ength nbs < 3, than return g
-                            nbs         = accessibleNeighbours m loc
-                            (index, ng) = newRnd g (length nbs - 1)
-                            newLoc      = nbs!!index
-                            newDir      = getDirection loc newLoc
+                            -- @TODO check if length nbs < 3, than return g
+                            nbs          = accessibleNeighbours m loc
+                            (newDir, ng) = pickDirection loc nbs
+
+                            pickDirection :: Location -> [Location] -> (Direction, Ghost)
+                            pickDirection current nbs' | length nbs' >= 3 = randomNotReverse g nbs' -- an actual intersection
+                                                       | length nbs' == 2 && (oppositeDirection (getDirection current (head nbs')) == getDirection current (nbs' !! 1)) = (getGhostDirection g, g) -- straight corridor
+                                                       | length nbs' == 2 = randomNotReverse g nbs' -- corner piece
+                                                       | length nbs' == 1 = (getDirection current (head nbs'), g) -- dead end
+
+                            randomNotReverse :: Ghost -> [Location] -> (Direction, Ghost)
+                            randomNotReverse g nbs'' =  (chosenDir, ng')
+                                             where
+                                                currentLoc   = getGhostLocation  g
+                                                currentDir   = getGhostDirection g
+                                                filtered     = filter (opposite currentDir currentLoc) nbs''
+                                                (index, ng') = newRnd g (length filtered - 1)
+                                                chosenLoc    = filtered !! index
+                                                chosenDir    = getDirection currentLoc chosenLoc
+
+                            opposite :: Direction -> Location -> Location -> Bool
+                            opposite curDir curLoc newLoc = getDirection curLoc newLoc /= oppositeDirection curDir
 
 
 

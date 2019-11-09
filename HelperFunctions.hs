@@ -38,6 +38,12 @@ module HelperFunctions where
     getGhostLocation (Inky   l _ _ _ _ _) = l
     getGhostLocation (Clyde  l _ _ _ _ _) = l
 
+    getGhostDirection :: Ghost -> Direction
+    getGhostDirection (Blinky _ dir _ _ _ _) = dir
+    getGhostDirection (Pinky  _ dir _ _ _ _) = dir
+    getGhostDirection (Inky   _ dir _ _ _ _) = dir
+    getGhostDirection (Clyde  _ dir _ _ _ _) = dir
+
     setGhostDirection :: Direction -> Ghost -> Ghost
     setGhostDirection d (Blinky loc _ b t i finit) = Blinky loc d b t i finit
     setGhostDirection d (Pinky  loc _ b t i finit) = Pinky  loc d b t i finit

@@ -20,7 +20,6 @@ module Controller where
                                                                                                      , score       = newScore + 300 * length eatenGhosts
                                                                                                      }
                      | otherwise                                          = return $ ult newGstate   { elapsedTime = elapsedTime gstate + secs 
-                                                                                                     --, score       = oldScore
                                                                                                      }
         where  
           -- often used variables
@@ -32,7 +31,7 @@ module Controller where
           stat            = status   gstate
           notScaredGhosts = filter isNotScared      ghosts
           eatenGhosts     = filter (isEaten pacLoc) ghosts
-          newScore        = score gstate-- + 300 * length eatenGhosts -- I think this should work @TODO @HEELP
+          newScore        = score gstate
           ult             = flip updateLevelTimer secs
 
           -- updated pacman
@@ -91,11 +90,6 @@ module Controller where
                       allowed Energizer = False
                       allowed Dot       = False
                       allowed _         = True
-          {-
-          TODO step
-          update gstate timer
-          update ghosttimers (if GhostBehaviour != frightened)
-     -}
 
 
     -- | Handle user input

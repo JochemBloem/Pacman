@@ -2,7 +2,7 @@ module RandomNumber where
 
     import Types
     {-
-        We could not figure out how to use 'on the go' created randoms effectivly. We found another solution. 
+        We could not figure out how to use 'on the go' created randoms effectively. We found another solution. 
         Using a very basic little python script we generated a LOT of random numbers (between 0 and 3 because that's what we needed) and put them all in this list.
         We save an Integer index in the Gamestate, so that new randoms can be acquired with the gamestate.
         The recursive call in this function does not update the index in the gamestate, so that makes our functions a little bit more random.
