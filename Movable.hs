@@ -42,11 +42,11 @@ module Movable where
         changeDirection p@(Pacman lo _ li ma) d m | pacmanAccessible targetField = Pacman lo d li ma
                                                   | otherwise                    = p
                 where
-                    (_, targetField) = getTargetTile m lo d
+                    (_, targetField) = getTargetTile m lo d pacmanSpeed
         move p@(Pacman lo@(x,y) d li ma) m     | pacmanAccessible targetField = Pacman targetLoc d li newangle'
                                                | otherwise                    = p {location = (round' x, round' y)} -- put pacman in the middle of the field, so he can change direction
             where 
-                (targetLoc, targetField)     = getTargetTile m lo d
+                (targetLoc, targetField)     = getTargetTile m lo d pacmanSpeed
                 newangle                     = ma - 8
                 newangle' | newangle < (-45) = 45
                           | otherwise        = newangle
@@ -60,38 +60,34 @@ module Movable where
         -- move ghosts
         move g@(Blinky l@(x, y) d gb t i finit) m  | ghostAccessible targetField = Blinky targetLoc             d gb t i finit
                                                    | otherwise                   = Blinky (round' x, round' y)  d gb t i finit
-            where (targetLoc, targetField) = getTargetTile m l d
+            where (targetLoc, targetField) = getTargetTile m l d pacmanSpeed
         move g@(Pinky  l@(x, y) d gb t i finit) m  | ghostAccessible targetField = Pinky   targetLoc            d gb t i finit
                                                    | otherwise                   = Pinky   (round' x, round' y) d gb t i finit
-            where (targetLoc, targetField) = getTargetTile m l d
+            where (targetLoc, targetField) = getTargetTile m l d pacmanSpeed
         move g@(Inky   l@(x, y) d gb t i finit) m  | ghostAccessible targetField = Inky    targetLoc            d gb t i finit
                                                    | otherwise                   = Inky    (round' x, round' y) d gb t i finit
-            where (targetLoc, targetField) = getTargetTile m l d
+            where (targetLoc, targetField) = getTargetTile m l d pacmanSpeed
         move g@(Clyde  l@(x, y) d gb t i finit) m  | ghostAccessible targetField = Clyde   targetLoc            d gb t i finit
                                                    | otherwise                   = Clyde   (round' x, round' y) d gb t i finit
-            where (targetLoc, targetField) = getTargetTile m l d
+            where (targetLoc, targetField) = getTargetTile m l d pacmanSpeed
 
-    getTargetTile :: Maze -> Location -> Direction -> TargetTile
-    getTargetTile m (x,y) N = (newLoc, getField m checkLoc) -- TODO isGhost boolean
+    getTargetTile :: Maze -> Location -> Direction -> Float -> TargetTile
+    getTargetTile m (x,y) N v = (newLoc, getField m checkLoc)
         where 
-            v               = movableSpeed
-            checkLoc        = (round' x,     round' $ y + (0.5 + v))
-            newLoc          = (x, y + v)
-    getTargetTile m (x,y) E = (newLoc, getField m checkLoc) 
+            checkLoc          = (round' x,     round' $ y + (0.5 + v))
+            newLoc            = (x, y + v)
+    getTargetTile m (x,y) E v = (newLoc, getField m checkLoc) 
         where 
-            v               = movableSpeed
-            checkLoc        = (round' $ x + (0.5 + v), round' y)
-            newLoc          = (x + v, y)
-    getTargetTile m (x,y) S = (newLoc, getField m checkLoc) 
+            checkLoc          = (round' $ x + (0.5 + v), round' y)
+            newLoc            = (x + v, y)
+    getTargetTile m (x,y) S v = (newLoc, getField m checkLoc) 
         where 
-            v               = movableSpeed
-            checkLoc        = (round' x,     round' $ y - (0.5 + v))
-            newLoc          = (x, y - v)
-    getTargetTile m (x,y) W = (newLoc, getField m checkLoc) 
+            checkLoc          = (round' x,     round' $ y - (0.5 + v))
+            newLoc            = (x, y - v)
+    getTargetTile m (x,y) W v = (newLoc, getField m checkLoc) 
         where 
-            v               = movableSpeed
-            checkLoc        = (round' $ x - (0.5 + v), round' y)
-            newLoc          = (x - v, y)
+            checkLoc          = (round' $ x - (0.5 + v), round' y)
+            newLoc            = (x - v, y)
     
     shiftLocation :: Direction -> Location -> Float -> Location
     shiftLocation N (x,y) n = (x  , y+n)

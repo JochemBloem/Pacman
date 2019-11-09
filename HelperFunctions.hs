@@ -86,13 +86,13 @@ module HelperFunctions where
     frighten (Clyde  loc dir _ t i _) = Clyde  loc dir Frightened t i
 
     unFrighten :: Ghost -> Float -> Ghost
-    unFrighten g@(Blinky loc dir gb t i finit) now | now >= finit + 10 = Blinky loc dir Chase t i 0
+    unFrighten g@(Blinky loc dir gb t i finit) now | now >= finit + frightenedTimer = Blinky loc dir Chase t i 0
                                                    | otherwise         = g    
-    unFrighten g@(Pinky  loc dir gb t i finit) now | now >= finit + 10 = Pinky  loc dir Chase t i 0
+    unFrighten g@(Pinky  loc dir gb t i finit) now | now >= finit + frightenedTimer = Pinky  loc dir Chase t i 0
                                                    | otherwise         = g    
-    unFrighten g@(Inky   loc dir gb t i finit) now | now >= finit + 10 = Inky   loc dir Chase t i 0
+    unFrighten g@(Inky   loc dir gb t i finit) now | now >= finit + frightenedTimer = Inky   loc dir Chase t i 0
                                                    | otherwise         = g    
-    unFrighten g@(Clyde  loc dir gb t i finit) now | now >= finit + 10 = Clyde  loc dir Chase t i 0
+    unFrighten g@(Clyde  loc dir gb t i finit) now | now >= finit + frightenedTimer = Clyde  loc dir Chase t i 0
                                                    | otherwise         = g
 
     {-

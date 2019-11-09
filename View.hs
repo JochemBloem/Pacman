@@ -19,7 +19,7 @@ module View where
                                   header   = Scale 0.5 0.5 $ color blue (Translate ((-1)*sx/2) 0 $ Text "PAUSED")
                                   body     = Scale 0.3 0.3 $ color blue (Translate ((-1)*sx) ((-1)*sy/2) $ Text "Press u to unpause")
                                   footer   = Scale 0.2 0.2 $ color blue (Translate ((-1)*sx) ((-1)*sy) $ Text "Or press r to restart")
-                      GameOn   -> Pictures (viewMaze (maze gstate) ++ viewGhosts (enemies gstate) ++ [viewPacman $ player gstate] ++ [viewHeaders gstate])
+                      GameOn   -> Pictures (viewMaze (maze gstate) ++ viewGhosts (enemies gstate) gstate ++ [viewPacman $ player gstate] ++ [viewHeaders gstate])
                       GameOver -> Pictures [header, body]
                                 where 
                                   (sx, sy) = screenSizeF
@@ -80,26 +80,36 @@ module View where
                                       basePacman :: Picture
                                       basePacman = Rotate (-90) $ color (makeColorI 255 255 0 255) $ arcSolid angle (360-angle) hwidth -- rotate so it faces north, so we can use the rotate' function
 
-    viewGhosts :: [Ghost] -> [Picture]
-    viewGhosts = map viewGhost
+    viewGhosts :: [Ghost] -> Gamestate -> [Picture]
+    viewGhosts gs gstate = map (`viewGhost` gstate) gs
 
-    viewGhost :: Ghost -> Picture
-    viewGhost (Blinky loc dir gb _ _ _) = color c $ ghostPicture loc dir
+    viewGhost :: Ghost -> Gamestate -> Picture
+    viewGhost (Blinky loc dir gb _ _ finit) gstate = color c $ ghostPicture loc dir
                                    where
-                                    c | gb == Frightened = makeColorI 33  33  255 255
+                                    c | gb == Frightened = frightenedColor (levelTimer gstate) finit
                                       | otherwise        = makeColorI 255 0   0   255
-    viewGhost (Pinky  loc dir gb _ _ _) = color c $ ghostPicture loc dir
+    viewGhost (Pinky  loc dir gb _ _ finit) gstate = color c $ ghostPicture loc dir
                                    where
-                                    c | gb == Frightened = makeColorI 33  33  255 255
+                                    c | gb == Frightened = frightenedColor (levelTimer gstate) finit
                                       | otherwise        = makeColorI 255 184 255 255
-    viewGhost (Inky   loc dir gb _ _ _) = color c $ ghostPicture loc dir
+    viewGhost (Inky   loc dir gb _ _ finit) gstate = color c $ ghostPicture loc dir
                                    where
-                                    c | gb == Frightened = makeColorI 33  33  255 255
+                                    c | gb == Frightened = frightenedColor (levelTimer gstate) finit
                                       | otherwise        = makeColorI 0   255 255 255
-    viewGhost (Clyde  loc dir gb _ _ _) = color c $ ghostPicture loc dir
+    viewGhost (Clyde  loc dir gb _ _ finit) gstate = color c $ ghostPicture loc dir
                                    where
-                                    c | gb == Frightened = makeColorI 33  33  255 255
+                                    c | gb == Frightened = frightenedColor (levelTimer gstate) finit
                                       | otherwise        = makeColorI 255 184 82  255
+
+    frightenedColor :: Float -> Float -> Color
+    frightenedColor lt finit | difference < blinkingTimer = darkblue
+                             | blink                      = white
+                             | otherwise                  = darkblue
+                              where
+                                darkblue   = makeColorI 33  33  255 255
+                                white      = makeColorI 255 255 255 255
+                                difference = lt - finit
+                                blink      = (even . floor) difference
 
     ghostPicture :: Location -> Direction -> Picture
     ghostPicture loc dir = Translate dx dy $ Pictures [ arcSolid 0 180 (fieldSize / 3), polygon path, eye1, eye2]

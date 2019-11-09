@@ -58,8 +58,11 @@ module Types where
     nO_SECS_BETWEEN_CYCLES :: Float
     nO_SECS_BETWEEN_CYCLES = 0.05
     
-    movableSpeed :: Float -- @TODO: make pacman speed different
-    movableSpeed = 0.125 -- 1 devided by pacmanspeed must be an integer
+    pacmanSpeed :: Float
+    pacmanSpeed = 0.125 -- 1 devided by pacmanspeed must be an integer
+
+    ghostSpeed :: Float
+    ghostSpeed = 0.1 -- for some reason the different speed causes weird non-fatal errors
 
     pixelsPerField :: Float
     pixelsPerField = 35
@@ -84,3 +87,9 @@ module Types where
 
     scatterTime :: Float
     scatterTime = 5
+
+    frightenedTimer :: Float
+    frightenedTimer = 10
+
+    blinkingTimer :: Float
+    blinkingTimer = 4
