@@ -86,11 +86,11 @@ module Initials where
     baseBlinky :: Float -> Ghost
     baseBlinky t = Blinky (7,10) W Chase t 0 
     basePinky  :: Float -> Ghost
-    basePinky  t = Pinky  (7,7) S Chase t 2500
+    basePinky  t = Pinky  (7,7)  S Chase t 2500
     baseInky   :: Float -> Ghost
-    baseInky   t = Inky   (6,7) N Chase t 500
+    baseInky   t = Inky   (6,7)  N Chase t 500
     baseClyde  :: Float -> Ghost
-    baseClyde  t = Clyde  (8,7) N Chase t 7500
+    baseClyde  t = Clyde  (8,7)  N Chase t 7500
 
     -- Scatter locations
     scatterLocation :: Ghost -> Location

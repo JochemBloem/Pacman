@@ -72,7 +72,7 @@ module Movable where
             where (targetLoc, targetField) = getTargetTile m l d
 
     getTargetTile :: Maze -> Location -> Direction -> TargetTile
-    getTargetTile m (x,y) N = (newLoc, getField m checkLoc) -- TODO isGhost
+    getTargetTile m (x,y) N = (newLoc, getField m checkLoc) -- TODO isGhost boolean
         where 
             v               = movableSpeed
             checkLoc        = (round' x,     round' $ y + (0.5 + v))
@@ -167,7 +167,7 @@ module Movable where
                                                      | otherwise                              = findPath m loc (scatterLocation g) dir
 
     randomDirection :: Ghost -> Maze -> Location -> Ghost
-    randomDirection g m loc = setGhostDirection newDir ng -- TODO use changeDirection
+    randomDirection g m loc = changeDirection ng newDir m
                         where
                             -- @TODO check if l;ength nbs < 3, than return g
                             nbs         = accessibleNeighbours m loc
