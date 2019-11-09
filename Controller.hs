@@ -46,7 +46,7 @@ module Controller where
           newGhosts   | pacmanDies = initialEnemies
                       | otherwise  = updateGhostTimers secs (map (`move` m) (aiSteps gstate behaveGhosts) )
                             where
-                              behaveGhosts = map updateGhostBehaviour ghosts
+                              behaveGhosts = map (`updateGhostBehaviour` levelTimer gstate) ghosts
           
           -- updated score and maze
           newGstate   | isOnTile pacLoc = updateGstate pacLoc
@@ -79,7 +79,7 @@ module Controller where
                             clearLoc = setField m loc Empty
 
                             scaredGhosts :: [Ghost]
-                            scaredGhosts = map (setGhostBehaviour Frightened) (enemies gstate)
+                            scaredGhosts = map (`frighten` levelTimer gstate) (enemies gstate)
                             
           mazeEmpty :: Bool --     Allowed : Wall Spawn SpawnDoor Empty Fruit
                             -- Not Allowed : Energizer Dot

@@ -191,9 +191,9 @@ module Movable where
     extraTime Frightened _ = 0
     extraTime _          s = s
 
-    updateGhostBehaviour:: Ghost -> Ghost
-    updateGhostBehaviour g | getGhostBehaviour g == Frightened  = unFrighten g
-                           | modded > round' chaseTime          = setGhostBehaviour Scatter g
-                           | otherwise                          = setGhostBehaviour Chase   g
-                where
-                    modded = round' (getGhostTime g) `mod` round' (chaseTime + scatterTime) 
+    updateGhostBehaviour:: Ghost -> Float -> Ghost
+    updateGhostBehaviour g now | getGhostBehaviour g == Frightened  = unFrighten g now
+                               | modded > round' chaseTime          = setGhostBehaviour Scatter g
+                               | otherwise                          = setGhostBehaviour Chase   g
+                                where
+                                    modded = round' (getGhostTime g) `mod` round' (chaseTime + scatterTime) 

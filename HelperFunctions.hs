@@ -72,8 +72,21 @@ module HelperFunctions where
                 gb   = getGhostBehaviour g
                 gLoc = roundLoc (getGhostLocation g)
     
-    unFrighten :: Ghost -> Ghost
-    unFrighten = undefined
+    frighten :: Ghost -> Float -> Ghost
+    frighten (Blinky loc dir _ t i _) = Blinky loc dir Frightened t i
+    frighten (Pinky  loc dir _ t i _) = Pinky  loc dir Frightened t i
+    frighten (Inky   loc dir _ t i _) = Inky   loc dir Frightened t i
+    frighten (Clyde  loc dir _ t i _) = Clyde  loc dir Frightened t i
+
+    unFrighten :: Ghost -> Float -> Ghost
+    unFrighten g@(Blinky loc dir gb t i finit) now | now >= finit + 10 = Blinky loc dir Chase t i 0
+                                                   | otherwise         = g    
+    unFrighten g@(Pinky  loc dir gb t i finit) now | now >= finit + 10 = Pinky  loc dir Chase t i 0
+                                                   | otherwise         = g    
+    unFrighten g@(Inky   loc dir gb t i finit) now | now >= finit + 10 = Inky   loc dir Chase t i 0
+                                                   | otherwise         = g    
+    unFrighten g@(Clyde  loc dir gb t i finit) now | now >= finit + 10 = Clyde  loc dir Chase t i 0
+                                                   | otherwise         = g
 
     {-
         MAZE
