@@ -174,11 +174,15 @@ module Movable where
                             (newDir, ng) = pickDirection loc nbs
 
                             pickDirection :: Location -> [Location] -> (Direction, Ghost)
-                            pickDirection current nbs' | length nbs' >= 3 = randomNotReverse g nbs' -- an actual intersection
-                                                       | length nbs' == 2 && (oppositeDirection (getDirection current (head nbs')) == getDirection current (nbs' !! 1)) = (getGhostDirection g, g) -- straight corridor
-                                                       | length nbs' == 2 = randomNotReverse g nbs' -- corner piece
-                                                       | length nbs' == 1 = (getDirection current (head nbs'), g) -- dead end
-
+                            pickDirection current nbs' | intersection = randomNotReverse   g        nbs'
+                                                       | corridor     = (getGhostDirection g             , g)
+                                                       | corner       = randomNotReverse   g        nbs'
+                                                       | deadend      = (getDirection current (head nbs'), g)
+                                                       where
+                                                        intersection = length nbs' >= 3
+                                                        corridor     = length nbs' == 2 && (oppositeDirection (getDirection current (head nbs')) == getDirection current (nbs' !! 1))
+                                                        corner       = length nbs' == 2
+                                                        deadend      = length nbs' == 1
                             randomNotReverse :: Ghost -> [Location] -> (Direction, Ghost)
                             randomNotReverse g nbs'' =  (chosenDir, ng')
                                              where
