@@ -19,6 +19,7 @@ module Types where
                                 ,   elapsedTime    :: Float
                                 ,   status         :: Status
                                 ,   levelTimer     :: Float
+                                ,   saved          :: Bool
                                 }
     data Status = Paused | GameOn | GameOver deriving (Eq)
 
@@ -41,12 +42,6 @@ module Types where
                | Inky   Location Direction GhostBehaviour Float Int Float
                | Clyde  Location Direction GhostBehaviour Float Int Float
             deriving (Eq)
-    -- instance (Eq) => Eq Ghost where
-    --     Blinky{} == Blinky{} = True
-    --     Pinky{}  == Pinky{}  = True
-    --     Inky{}   == Inky{}   = True
-    --     Clyde{}  == Clyde{}  = True
-    --     _        == _        = False
           
     data GhostBehaviour = Chase | Frightened | Scatter
             deriving(Eq)

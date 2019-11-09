@@ -13,7 +13,7 @@ module Initials where
     initialGameState = resetGameState 0 1
 
     resetGameState :: Int -> Int -> Gamestate
-    resetGameState score level = Gamestate initialMaze p initialEnemies d score level 0 GameOn 0
+    resetGameState score level = Gamestate initialMaze p initialEnemies d score level 0 GameOn 0 False
             where 
                 p@(Pacman _ d _ _) = initialPacman
     {- 

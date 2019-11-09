@@ -12,14 +12,17 @@ module Controller where
     
     -- | Handle one iteration of the game
     step :: Float -> Gamestate -> IO Gamestate
-    step _ gstate@(Gamestate _ _ _ _ _ _ _ Paused   _)                    = return gstate
-    step _ gstate@(Gamestate _ _ _ _ _ _ _ GameOver _)                    = return gstate -- @TODO: filesystem
-    step secs gstate | mazeEmpty                                          = return $ (resetGameState (score newGstate + 500) (lvl + 1))  { player = resetPacman lvl (lives $ player gstate) }
-                     | elapsedTime gstate + secs > nO_SECS_BETWEEN_CYCLES = return $ ult finalGstate { elapsedTime = 0
+    step _ gstate@(Gamestate _ _ _ _ _ _ _ Paused   _ _    )                    = return gstate
+    step _ gstate@(Gamestate _ _ _ _ _ _ _ GameOver _ saved)                    | not saved = do 
+                                                                                                appendFile "scores/highscores.txt" (show (score gstate) ++ "\n")
+                                                                                                return gstate { saved = True }
+                                                                                | otherwise = return gstate
+    step secs gstate | mazeEmpty                                            = return $ (resetGameState (score newGstate + 500) (lvl + 1))  { player = resetPacman lvl (lives $ player gstate) }
+                     | elapsedTime gstate + secs > nO_SECS_BETWEEN_CYCLES   = return $ ult finalGstate { elapsedTime = 0
                                                                                                      , enemies     = newGhosts
                                                                                                      , score       = newScore + 300 * length eatenGhosts
                                                                                                      }
-                     | otherwise                                          = return $ ult newGstate   { elapsedTime = elapsedTime gstate + secs 
+                     | otherwise                                            = return $ ult newGstate   { elapsedTime = elapsedTime gstate + secs 
                                                                                                      }
         where  
           -- often used variables
