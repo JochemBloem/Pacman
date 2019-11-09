@@ -77,8 +77,10 @@ module Types where
     defLoc :: Location
     defLoc = (-1,-1)
 
+    -- These durations for chase and scatter are not the official durations, 
+    --  but they seemed to work better with our maze
     chaseTime :: Float
-    chaseTime = 20
+    chaseTime = 10
 
     scatterTime :: Float
-    scatterTime = 7
+    scatterTime = 5
