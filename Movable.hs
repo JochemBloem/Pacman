@@ -23,13 +23,13 @@ module Movable where
     instance Show Pacman where
         show (Pacman lo d li _) = "Pacman:\n    Location:  " ++ show lo ++ "\n    Direction: " ++ show d ++ "\n    Lives:     " ++ show li ++ "\n" 
     instance Show Ghost where
-        show (Blinky l d g t i)  = stringifyGhost "Blinky" l d g t i
-        show (Pinky  l d g t i)  = stringifyGhost "Pinky"  l d g t i
-        show (Inky   l d g t i)  = stringifyGhost "Inky"   l d g t i
-        show (Clyde  l d g t i)  = stringifyGhost "Clyde"  l d g t i
+        show (Blinky l d g t i finit)  = stringifyGhost "Blinky" l d g t i finit
+        show (Pinky  l d g t i finit)  = stringifyGhost "Pinky"  l d g t i finit
+        show (Inky   l d g t i finit)  = stringifyGhost "Inky"   l d g t i finit
+        show (Clyde  l d g t i finit)  = stringifyGhost "Clyde"  l d g t i finit
     
-    stringifyGhost :: String -> Location -> Direction -> GhostBehaviour -> Float -> Int -> String
-    stringifyGhost name loc dir gb ms i = name ++ "\n    " ++ "Location:       " ++ show loc ++ "\n    Direction:      " ++ show dir ++ "\n    Behaviour:      " ++ show gb ++ "\n    Internal clock: " ++ show ms ++ "s\n    rndindex:    " ++ show i
+    stringifyGhost :: String -> Location -> Direction -> GhostBehaviour -> Float -> Int -> Float -> String
+    stringifyGhost name loc dir gb ms i finit = name ++ "\n    " ++ "Location:       " ++ show loc ++ "\n    Direction:      " ++ show dir ++ "\n    Behaviour:      " ++ show gb ++ "\n    Internal clock: " ++ show ms ++ "s\n    rndindex:    " ++ show i ++ "Finit: " ++ show finit
         
     {- 
         MOVABLE 
@@ -53,22 +53,22 @@ module Movable where
     
     instance Movable Ghost where
         -- change ghost directions
-        changeDirection (Blinky l _ g t i) d _ = Blinky l d g t i
-        changeDirection (Pinky  l _ g t i) d _ = Pinky  l d g t i
-        changeDirection (Inky   l _ g t i) d _ = Inky   l d g t i
-        changeDirection (Clyde  l _ g t i) d _ = Clyde  l d g t i
+        changeDirection (Blinky l _ g t i finit) d _ = Blinky l d g t i finit
+        changeDirection (Pinky  l _ g t i finit) d _ = Pinky  l d g t i finit
+        changeDirection (Inky   l _ g t i finit) d _ = Inky   l d g t i finit
+        changeDirection (Clyde  l _ g t i finit) d _ = Clyde  l d g t i finit   
         -- move ghosts
-        move g@(Blinky l@(x, y) d gb t i) m  | ghostAccessible targetField = Blinky targetLoc             d gb t i
-                                             | otherwise                   = Blinky (round' x, round' y)  d gb t i
+        move g@(Blinky l@(x, y) d gb t i finit) m  | ghostAccessible targetField = Blinky targetLoc             d gb t i finit
+                                                   | otherwise                   = Blinky (round' x, round' y)  d gb t i finit
             where (targetLoc, targetField) = getTargetTile m l d
-        move g@(Pinky  l@(x, y) d gb t i) m  | ghostAccessible targetField = Pinky  targetLoc            d gb t i
-                                             | otherwise                   = Pinky  (round' x, round' y) d gb t i
+        move g@(Pinky  l@(x, y) d gb t i finit) m  | ghostAccessible targetField = Pinky   targetLoc            d gb t i finit
+                                                   | otherwise                   = Pinky   (round' x, round' y) d gb t i finit
             where (targetLoc, targetField) = getTargetTile m l d
-        move g@(Inky   l@(x, y) d gb t i) m  | ghostAccessible targetField = Inky   targetLoc            d gb t i
-                                             | otherwise                   = Inky   (round' x, round' y) d gb t i
+        move g@(Inky   l@(x, y) d gb t i finit) m  | ghostAccessible targetField = Inky    targetLoc            d gb t i finit
+                                                   | otherwise                   = Inky    (round' x, round' y) d gb t i finit
             where (targetLoc, targetField) = getTargetTile m l d
-        move g@(Clyde  l@(x, y) d gb t i) m  | ghostAccessible targetField = Clyde  targetLoc            d gb t i
-                                             | otherwise                   = Clyde  (round' x, round' y) d gb t i
+        move g@(Clyde  l@(x, y) d gb t i finit) m  | ghostAccessible targetField = Clyde   targetLoc            d gb t i finit
+                                                   | otherwise                   = Clyde   (round' x, round' y) d gb t i finit
             where (targetLoc, targetField) = getTargetTile m l d
 
     getTargetTile :: Maze -> Location -> Direction -> TargetTile
@@ -109,62 +109,62 @@ module Movable where
     aiSteps gstate = map (aiStep gstate)
     
     aiStep :: Gamestate -> Ghost -> Ghost
-    aiStep gstate g@(Blinky loc dir gb ms i)| isEaten pacLoc g                 = baseBlinky ms
-                                            | gb == Frightened && isOnTile loc = randomDirection g m loc
-                                            | isOnTile loc                     = Blinky loc newDir gb ms i
-                                            | otherwise                        = g -- Cant change direction
-                                           where 
-                                            pacman   = player gstate
-                                            (px, py) = location pacman
-                                            pacLoc   = (round' px, round' py)
-                                            m        = maze gstate
-                                            newDir   | gb == Chase      = findPath m loc pacLoc dir
-                                                     | gb == Scatter    = findPath m loc (scatterLocation g) dir
-    aiStep gstate g@(Pinky  loc dir gb ms i)| isEaten pacLoc g                 = basePinky ms
-                                            | gb == Frightened && isOnTile loc = randomDirection g m loc
-                                            | isOnTile loc                     = Pinky loc newDir gb ms i
-                                            | otherwise                        = g -- Cant change direction
-                                           where 
-                                            pacman   = player gstate
-                                            (px, py) = location pacman
-                                            pacLoc   = (round' px, round' py)
-                                            m        = maze gstate
-                                            newDir   | gb == Chase      = findPath m loc (shiftLocation (direction pacman) pacLoc 4) dir
-                                                     | gb == Scatter    = findPath m loc (scatterLocation g) dir
-    aiStep gstate g@(Inky   loc dir gb ms i)| isEaten pacLoc g                 = baseInky ms
-                                            | gb == Frightened && isOnTile loc = randomDirection g m loc
-                                            | isOnTile loc                     = Inky loc newDir gb ms i
-                                            | otherwise                        = g -- Cant change direction
-                                           where 
-                                            pacman   = player gstate
-                                            (px, py) = location pacman
-                                            pacLoc   = (round' px, round' py)
-                                            m        = maze gstate
-                                            newDir   | gb == Chase      = findPath m loc inkyChaseLoc dir
-                                                     | gb == Scatter    = findPath m loc (scatterLocation g) dir
-                                            
-                                            -- new location aim when chasing
-                                            inkyChaseLoc :: Location
-                                            inkyChaseLoc = (round' x, round' y)
+    aiStep gstate g@(Blinky loc dir gb ms i finit) | isEaten pacLoc g                 = baseBlinky ms
+                                                   | gb == Frightened && isOnTile loc = randomDirection g m loc
+                                                   | isOnTile loc                     = Blinky loc newDir gb ms i finit
+                                                   | otherwise                        = g -- Cant change direction
                                                     where 
-                                                        (Blinky (bix,biy) _ _ _ _) = head (enemies gstate) -- gstate always contains enemies, if not a crash is fine
-                                                        (px,py) = pacLoc
-                                                        (bx,by) = (round' bix, round' biy)
-                                                        (x,y)   = (bix + (px - bix) * 2,biy + (py - biy) * 2)
+                                                        pacman   = player gstate
+                                                        (px, py) = location pacman
+                                                        pacLoc   = (round' px, round' py)
+                                                        m        = maze gstate
+                                                        newDir   | gb == Chase      = findPath m loc pacLoc dir
+                                                                 | gb == Scatter    = findPath m loc (scatterLocation g) dir
+    aiStep gstate g@(Pinky  loc dir gb ms i finit) | isEaten pacLoc g                 = basePinky ms
+                                                   | gb == Frightened && isOnTile loc = randomDirection g m loc
+                                                   | isOnTile loc                     = Pinky loc newDir gb ms i finit
+                                                   | otherwise                        = g -- Cant change direction
+                                                    where 
+                                                        pacman   = player gstate
+                                                        (px, py) = location pacman
+                                                        pacLoc   = (round' px, round' py)
+                                                        m        = maze gstate
+                                                        newDir   | gb == Chase      = findPath m loc (shiftLocation (direction pacman) pacLoc 4) dir
+                                                                 | gb == Scatter    = findPath m loc (scatterLocation g) dir
+    aiStep gstate g@(Inky   loc dir gb ms i finit) | isEaten pacLoc g                 = baseInky ms
+                                                   | gb == Frightened && isOnTile loc = randomDirection g m loc
+                                                   | isOnTile loc                     = Inky loc newDir gb ms i finit
+                                                   | otherwise                        = g -- Cant change direction
+                                                    where 
+                                                        pacman   = player gstate
+                                                        (px, py) = location pacman
+                                                        pacLoc   = (round' px, round' py)
+                                                        m        = maze gstate
+                                                        newDir   | gb == Chase      = findPath m loc inkyChaseLoc dir
+                                                                 | gb == Scatter    = findPath m loc (scatterLocation g) dir
+                                            
+                                                        -- new location aim when chasing
+                                                        inkyChaseLoc :: Location
+                                                        inkyChaseLoc = (round' x, round' y)
+                                                                where 
+                                                                    (Blinky (bix,biy) _ _ _ _ _) = head (enemies gstate) -- gstate always contains enemies, if not a crash is fine
+                                                                    (px,py) = pacLoc
+                                                                    (bx,by) = (round' bix, round' biy)
+                                                                    (x,y)   = (bix + (px - bix) * 2,biy + (py - biy) * 2)
 
 
-    aiStep gstate g@(Clyde  loc dir gb ms i)| isEaten pacLoc g                 = baseClyde ms
-                                            | gb == Frightened && isOnTile loc = randomDirection g m loc        
-                                            | isOnTile loc                     = Clyde loc newDir gb ms i
-                                            | otherwise                        = g -- Cant change direction
-                                           where 
-                                            pacman   = player gstate
-                                            (px, py) = location pacman
-                                            pacLoc   = (round' px, round' py)
-                                            m        = maze gstate
+    aiStep gstate g@(Clyde  loc dir gb ms i finit) | isEaten pacLoc g                 = baseClyde ms
+                                                   | gb == Frightened && isOnTile loc = randomDirection g m loc        
+                                                   | isOnTile loc                     = Clyde loc newDir gb ms i finit
+                                                   | otherwise                        = g -- Cant change direction
+                                                    where 
+                                                        pacman   = player gstate
+                                                        (px, py) = location pacman
+                                                        pacLoc   = (round' px, round' py)
+                                                        m        = maze gstate
 
-                                            newDir   | gb == Chase && distance loc pacLoc > 5 = findPath m loc pacLoc dir     
-                                                     | otherwise                              = findPath m loc (scatterLocation g) dir
+                                                        newDir   | gb == Chase && distance loc pacLoc > 5 = findPath m loc pacLoc dir     
+                                                                 | otherwise                              = findPath m loc (scatterLocation g) dir
 
     randomDirection :: Ghost -> Maze -> Location -> Ghost
     randomDirection g m loc = changeDirection ng newDir m
@@ -182,17 +182,17 @@ module Movable where
     updateGhostTimers s = map (updateGhostTimer s)
 
     updateGhostTimer :: Float -> Ghost -> Ghost
-    updateGhostTimer secs (Blinky l d g t i) = Blinky l d g (t + extraTime g secs) i
-    updateGhostTimer secs (Pinky  l d g t i) = Pinky  l d g (t + extraTime g secs) i
-    updateGhostTimer secs (Inky   l d g t i) = Inky   l d g (t + extraTime g secs) i
-    updateGhostTimer secs (Clyde  l d g t i) = Clyde  l d g (t + extraTime g secs) i
+    updateGhostTimer secs (Blinky l d g t i finit) = Blinky l d g (t + extraTime g secs) i finit
+    updateGhostTimer secs (Pinky  l d g t i finit) = Pinky  l d g (t + extraTime g secs) i finit
+    updateGhostTimer secs (Inky   l d g t i finit) = Inky   l d g (t + extraTime g secs) i finit
+    updateGhostTimer secs (Clyde  l d g t i finit) = Clyde  l d g (t + extraTime g secs) i finit
 
     extraTime :: GhostBehaviour -> Float -> Float
     extraTime Frightened _ = 0
     extraTime _          s = s
 
     updateGhostBehaviour:: Ghost -> Ghost
-    updateGhostBehaviour g | getGhostBehaviour g == Frightened  = g
+    updateGhostBehaviour g | getGhostBehaviour g == Frightened  = unFrighten g
                            | modded > round' chaseTime          = setGhostBehaviour Scatter g
                            | otherwise                          = setGhostBehaviour Chase   g
                 where

@@ -33,37 +33,37 @@ module HelperFunctions where
     ghostAccessible _    = True
 
     getGhostLocation :: Ghost -> Location
-    getGhostLocation (Blinky l _ _ _ _) = l
-    getGhostLocation (Pinky  l _ _ _ _) = l
-    getGhostLocation (Inky   l _ _ _ _) = l
-    getGhostLocation (Clyde  l _ _ _ _) = l
+    getGhostLocation (Blinky l _ _ _ _ _) = l
+    getGhostLocation (Pinky  l _ _ _ _ _) = l
+    getGhostLocation (Inky   l _ _ _ _ _) = l
+    getGhostLocation (Clyde  l _ _ _ _ _) = l
 
     setGhostDirection :: Direction -> Ghost -> Ghost
-    setGhostDirection d (Blinky loc _ b t i) = Blinky loc d b t i
-    setGhostDirection d (Pinky  loc _ b t i) = Pinky  loc d b t i
-    setGhostDirection d (Inky   loc _ b t i) = Inky   loc d b t i
-    setGhostDirection d (Clyde  loc _ b t i) = Clyde  loc d b t i
+    setGhostDirection d (Blinky loc _ b t i finit) = Blinky loc d b t i finit
+    setGhostDirection d (Pinky  loc _ b t i finit) = Pinky  loc d b t i finit
+    setGhostDirection d (Inky   loc _ b t i finit) = Inky   loc d b t i finit
+    setGhostDirection d (Clyde  loc _ b t i finit) = Clyde  loc d b t i finit
 
     getGhostTime :: Ghost -> Float
-    getGhostTime (Blinky _ _ _ t _) = t
-    getGhostTime (Pinky  _ _ _ t _) = t
-    getGhostTime (Inky   _ _ _ t _) = t
-    getGhostTime (Clyde  _ _ _ t _) = t
+    getGhostTime (Blinky _ _ _ t _ _) = t
+    getGhostTime (Pinky  _ _ _ t _ _) = t
+    getGhostTime (Inky   _ _ _ t _ _) = t
+    getGhostTime (Clyde  _ _ _ t _ _) = t
 
     isNotScared :: Ghost -> Bool
     isNotScared g = getGhostBehaviour g /= Frightened
 
     getGhostBehaviour :: Ghost -> GhostBehaviour
-    getGhostBehaviour (Blinky _ _ b _ _) = b
-    getGhostBehaviour (Pinky  _ _ b _ _) = b
-    getGhostBehaviour (Inky   _ _ b _ _) = b
-    getGhostBehaviour (Clyde  _ _ b _ _) = b
+    getGhostBehaviour (Blinky _ _ b _ _ _) = b
+    getGhostBehaviour (Pinky  _ _ b _ _ _) = b
+    getGhostBehaviour (Inky   _ _ b _ _ _) = b
+    getGhostBehaviour (Clyde  _ _ b _ _ _) = b
 
     setGhostBehaviour :: GhostBehaviour -> Ghost -> Ghost
-    setGhostBehaviour b (Blinky loc dir _ t i) = Blinky loc dir b t i
-    setGhostBehaviour b (Pinky  loc dir _ t i) = Pinky  loc dir b t i
-    setGhostBehaviour b (Inky   loc dir _ t i) = Inky   loc dir b t i
-    setGhostBehaviour b (Clyde  loc dir _ t i) = Clyde  loc dir b t i
+    setGhostBehaviour b (Blinky loc dir _ t i finit) = Blinky loc dir b t i finit
+    setGhostBehaviour b (Pinky  loc dir _ t i finit) = Pinky  loc dir b t i finit
+    setGhostBehaviour b (Inky   loc dir _ t i finit) = Inky   loc dir b t i finit
+    setGhostBehaviour b (Clyde  loc dir _ t i finit) = Clyde  loc dir b t i finit
 
     
     isEaten :: Location -> Ghost -> Bool
@@ -71,6 +71,9 @@ module HelperFunctions where
             where
                 gb   = getGhostBehaviour g
                 gLoc = roundLoc (getGhostLocation g)
+    
+    unFrighten :: Ghost -> Ghost
+    unFrighten = undefined
 
     {-
         MAZE
@@ -142,3 +145,7 @@ module HelperFunctions where
     amountInList _ []     = 0
     amountInList n (x:xs) | x == n    = 1 + amountInList n xs
                           | otherwise =     amountInList n xs
+
+    -- update the levelTimer in the gamestate
+    updateLevelTimer :: Gamestate -> Float -> Gamestate
+    updateLevelTimer gstate secs = gstate { levelTimer = levelTimer gstate + secs }

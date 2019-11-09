@@ -13,7 +13,7 @@ module Initials where
     initialGameState = resetGameState 0 1
 
     resetGameState :: Int -> Int -> Gamestate
-    resetGameState score level = Gamestate initialMaze p initialEnemies d score level 0 GameOn
+    resetGameState score level = Gamestate almostEmptyMaze p initialEnemies d score level 0 GameOn 0 -- TODO reset to initialMaze
             where 
                 p@(Pacman _ d _ _) = initialPacman
     {- 
@@ -84,13 +84,13 @@ module Initials where
     initialEnemies = [baseBlinky 0, basePinky 0, baseInky 0, baseClyde 0]
 
     baseBlinky :: Float -> Ghost
-    baseBlinky t = Blinky (7,10) W Chase t 0 
+    baseBlinky t = Blinky (7,10) W Chase t 0 0
     basePinky  :: Float -> Ghost
-    basePinky  t = Pinky  (7,7)  S Chase t 2500
+    basePinky  t = Pinky  (7,7)  S Chase t 2500 0
     baseInky   :: Float -> Ghost
-    baseInky   t = Inky   (6,7)  N Chase t 500
+    baseInky   t = Inky   (6,7)  N Chase t 500 0
     baseClyde  :: Float -> Ghost
-    baseClyde  t = Clyde  (8,7)  N Chase t 7500
+    baseClyde  t = Clyde  (8,7)  N Chase t 7500 0
 
     -- Scatter locations
     scatterLocation :: Ghost -> Location

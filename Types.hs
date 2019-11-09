@@ -18,6 +18,7 @@ module Types where
                                 ,   level          :: Int
                                 ,   elapsedTime    :: Float
                                 ,   status         :: Status
+                                ,   levelTimer     :: Float
                                 }
     data Status = Paused | GameOn | GameOver deriving (Eq)
 
@@ -35,10 +36,10 @@ module Types where
                          , lives      :: Int
                          , mouthangle :: Float
                          }
-    data Ghost = Blinky Location Direction GhostBehaviour Float Int
-               | Pinky  Location Direction GhostBehaviour Float Int
-               | Inky   Location Direction GhostBehaviour Float Int
-               | Clyde  Location Direction GhostBehaviour Float Int
+    data Ghost = Blinky Location Direction GhostBehaviour Float Int Float
+               | Pinky  Location Direction GhostBehaviour Float Int Float
+               | Inky   Location Direction GhostBehaviour Float Int Float
+               | Clyde  Location Direction GhostBehaviour Float Int Float
             deriving (Eq)
     -- instance (Eq) => Eq Ghost where
     --     Blinky{} == Blinky{} = True

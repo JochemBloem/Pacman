@@ -12,14 +12,14 @@ module Controller where
     
     -- | Handle one iteration of the game
     step :: Float -> Gamestate -> IO Gamestate
-    step _ gstate@(Gamestate _ _ _ _ _ _ _ Paused)                        = return gstate
-    step _ gstate@(Gamestate _ _ _ _ _ _ _ GameOver)                      = return gstate -- @TODO: filesystem
+    step _ gstate@(Gamestate _ _ _ _ _ _ _ Paused _)                      = return gstate
+    step _ gstate@(Gamestate _ _ _ _ _ _ _ GameOver _)                    = return gstate -- @TODO: filesystem
     step secs gstate | mazeEmpty                                          = return $ (resetGameState (score newGstate + 500) (lvl + 1))  { player = resetPacman lvl (lives $ player gstate) }
-                     | elapsedTime gstate + secs > nO_SECS_BETWEEN_CYCLES = return $ finalGstate { elapsedTime = 0
-                                                                                                 , enemies     = newGhosts
-                                                                                                 }
-                     | otherwise                                          = return $ newGstate   { elapsedTime = elapsedTime gstate + secs 
-                                                                                                 }
+                     | elapsedTime gstate + secs > nO_SECS_BETWEEN_CYCLES = return $ ult finalGstate { elapsedTime = 0
+                                                                                                     , enemies     = newGhosts
+                                                                                                     }
+                     | otherwise                                          = return $ ult newGstate   { elapsedTime = elapsedTime gstate + secs 
+                                                                                                     }
         where  
           -- often used variables
           pacman    = player  gstate
@@ -31,6 +31,7 @@ module Controller where
           notScaredGhosts = filter isNotScared ghosts
           eatenGhosts     = map (isEaten pacLoc) ghosts
           newScore        = score gstate + 100000 * amountInList True eatenGhosts -- I think this should work @TODO @HEELP
+          ult             = flip updateLevelTimer secs
 
           -- updated pacman
           newPacman = move newPacman' m

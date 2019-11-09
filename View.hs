@@ -23,7 +23,7 @@ module View where
                       GameOver -> Pictures [header, body]
                                 where 
                                   (sx, sy) = screenSizeF
-                                  header = Scale 0.5 0.5 $ color red (Translate ((-1)*sx/2) 0 $ Text "GAME OVER")
+                                  header   = Scale 0.5 0.5 $ color red (Translate ((-1)*sx/2) 0 $ Text "GAME OVER")
                                   body     = Scale 0.3 0.3 $ color red (Translate ((-1)*sx) ((-1)*sy/2) $ Text (show $ score gstate))
                       
     {-
@@ -60,12 +60,12 @@ module View where
      -}
      
     viewHeaders :: Gamestate -> Picture
-    viewHeaders (Gamestate _ (Pacman _ _ lives _) ( Blinky _ _ _  s _ :_) _ score level _ _) = Translate dx dy $ scale' 0.2 $ color white $ Text headers
+    viewHeaders (Gamestate _ (Pacman _ _ lives _) ( Blinky _ _ _ s _ _ :_) _ score level _ _ lt) = Translate dx dy $ scale' 0.2 $ color white $ Text headers
                     where
                       (x, y) = screenSizeF
                       dx = (-1) * (x / 2) * 0.9
                       dy =        (y / 2) * 0.88
-                      headers = "Lives: " ++ show lives ++ "  Score: " ++ show score ++ "  Level: " ++ show level ++ " ibc" ++ show s -- @TODO remove
+                      headers = "Lives: " ++ show lives ++ "  Score: " ++ show score ++ "  Level: " ++ show level ++ " lt:" ++ show lt
     {-
         Movable view functions
      -}
@@ -84,19 +84,19 @@ module View where
     viewGhosts = map viewGhost
 
     viewGhost :: Ghost -> Picture
-    viewGhost (Blinky loc dir gb _ _) = color c $ ghostPicture loc dir
+    viewGhost (Blinky loc dir gb _ _ _) = color c $ ghostPicture loc dir
                                    where
                                     c | gb == Frightened = makeColorI 33  33  255 255
                                       | otherwise        = makeColorI 255 0   0   255
-    viewGhost (Pinky  loc dir gb _ _) = color c $ ghostPicture loc dir
+    viewGhost (Pinky  loc dir gb _ _ _) = color c $ ghostPicture loc dir
                                    where
                                     c | gb == Frightened = makeColorI 33  33  255 255
                                       | otherwise        = makeColorI 255 184 255 255
-    viewGhost (Inky   loc dir gb _ _) = color c $ ghostPicture loc dir
+    viewGhost (Inky   loc dir gb _ _ _) = color c $ ghostPicture loc dir
                                    where
                                     c | gb == Frightened = makeColorI 33  33  255 255
                                       | otherwise        = makeColorI 0   255 255 255
-    viewGhost (Clyde  loc dir gb _ _) = color c $ ghostPicture loc dir
+    viewGhost (Clyde  loc dir gb _ _ _) = color c $ ghostPicture loc dir
                                    where
                                     c | gb == Frightened = makeColorI 33  33  255 255
                                       | otherwise        = makeColorI 255 184 82  255
