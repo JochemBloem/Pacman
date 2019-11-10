@@ -51,7 +51,7 @@ module View where
     viewField (Fruit,     i) = color red (Translate dx dy $ rectangleWire fsize fsize)
                   where 
                     (dx, dy) = toScreenSpace i
-                    fsize = scaledFieldSize 0.7  / 2
+                    fsize    = scaledFieldSize 0.7  / 2
 
               
     
@@ -60,25 +60,35 @@ module View where
      -}
      
     viewHeaders :: Gamestate -> Picture
-    viewHeaders (Gamestate _ (Pacman _ _ lives _) ( Blinky _ _ _ s _ finit :_) _ score level _ _ _ _) = Translate dx dy $ scale' 0.2 $ color white $ Text headers
+    viewHeaders (Gamestate _ (Pacman _ _ lives _) _ _ score level _ _ _ _) = Translate dx dy $ Pictures [pacmans', shiftRight (12*fwidth) $ scale' 0.2 $ color white $ Text headers]
                     where
                       (x, y) = screenSizeF
                       dx = (-1) * (x / 2) * 0.9
                       dy =        (y / 2) * 0.88
-                      headers = "Lives: " ++ show lives ++ "  Score: " ++ show score ++ "  Level: " ++ show level ++ " finit:" ++ show finit
+                      shiftRight dist = Translate dist 0
+                      fwidth = pixelsPerField / 3
+                      maxDisplayedLives = min 5 lives
+                      overflowLives = max 0 (lives - maxDisplayedLives)
+                      headerPacman = Translate 0 (fwidth / 2) $ rotate' E $ viewBasePacman fwidth 45
+                      pacmans = zip (replicate maxDisplayedLives headerPacman) [0..]
+                      tfwidths n = Translate (fwidth * 2 * n) 0
+                      pacmans' = Pictures $ [tfwidths n pacman | (pacman, n) <- pacmans] ++ overflow
+                      overflow | overflowLives > 0 = [shiftRight (fwidth * 10) $ scale' 0.1 $ color white $ Text ("+ " ++ show overflowLives)]
+                               | otherwise         = []
+                      headers = "  Score: " ++ show score ++ "  Level: " ++ show level
     {-
         Movable view functions
      -}
     viewPacman :: Pacman -> Picture
-    viewPacman p@(Pacman loc dir _ ma) = Translate dx dy $ rotate' dir basePacman 
+    viewPacman p@(Pacman loc dir _ ma) = Translate dx dy $ rotate' dir (viewBasePacman hwidth ma)
                                     where 
                                       i        = locationToIndex loc
                                       (dx, dy) = characterSpaceToScreenSpace $ location p
                                       hwidth   = pixelsPerField / 3
                                       angle    = abs ma
 
-                                      basePacman :: Picture
-                                      basePacman = Rotate (-90) $ color (makeColorI 255 255 0 255) $ arcSolid angle (360-angle) hwidth -- rotate so it faces north, so we can use the rotate' function
+    viewBasePacman :: Float -> Float -> Picture
+    viewBasePacman hwidth angle = Rotate (-90) $ color (makeColorI 255 255 0 255) $ arcSolid angle (360-angle) hwidth -- rotate so it faces north, so we can use the rotate' function
 
     viewGhosts :: [Ghost] -> Gamestate -> [Picture]
     viewGhosts gs gstate = map (`viewGhost` gstate) gs
