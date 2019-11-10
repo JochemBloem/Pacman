@@ -10,34 +10,34 @@ module View where
     import Data.Sort
     
     view :: Gamestate -> IO Picture
-    view gstate | status gstate == GameOver =   let (sx, sy) = screenSizeF
-                                                    hwidth   = pixelsPerField / 3
-                                                    (middlex', _) = boardSizeI
-                                                    middlex  = fromIntegral $ middlex' `div` 2
-                                                    pacman   = viewPacman (Pacman (middlex - 2,0) W 0 45)
-                                                    ghosts'  =          [ Blinky (middlex - 1,0) W Chase 0 0 0
-                                                                        , Pinky  (middlex    ,0) W Chase 0 0 0
-                                                                        , Inky   (middlex + 1,0) W Chase 0 0 0
-                                                                        , Clyde  (middlex + 2,0) W Chase 0 0 0
-                                                                        ]
-                                                    ghosts = map (`viewGhost` gstate) ghosts'
-                                                    top   = fst screenSizeF
-                                                    up    = 0.5 * top
-                                                    characters = scale' 2 $ Translate hwidth up $ Pictures $ pacman : ghosts
+    view gstate | status gstate == GameOver =   let (sx, sy)         = screenSizeF
+                                                    hwidth           = pixelsPerField / 3
+                                                    (middlex', _)    = boardSizeI
+                                                    middlex          = fromIntegral $ middlex' `div` 2
+                                                    pacman           = viewPacman (Pacman (middlex - 2,0) W 0 45)
+                                                    ghosts'          = [           Blinky (middlex - 1,0) W Chase 0 0 0
+                                                                       ,           Pinky  (middlex    ,0) W Chase 0 0 0
+                                                                       ,           Inky   (middlex + 1,0) W Chase 0 0 0
+                                                                       ,           Clyde  (middlex + 2,0) W Chase 0 0 0
+                                                                       ]
+                                                    ghosts           = map (`viewGhost` gstate) ghosts'
+                                                    top              = fst screenSizeF
+                                                    up               = 0.5 * top
+                                                    characters       = scale' 2 $ Translate hwidth up $ Pictures $ pacman : ghosts
                                                     shiftDown amount = Translate 0 (-amount)
                                                     shiftLeft amount = Translate (-amount) 0 
-                                                    centre    = shiftLeft (9*hwidth)
-                                                    scoreText = color white . centre . scale' 0.2
-                                                    gameover        = centre . scale' 0.25 . shiftDown (-45*hwidth) . color red $ Text "Game Over!"
-                                                    highscore score =                        scoreText $ Text ("High score: " ++ score)
-                                                    yourscore       = shiftDown (5*hwidth) . scoreText $ Text ("Your score: " ++ show (score gstate)) 
+                                                    centre           = shiftLeft (9*hwidth)
+                                                    scoreText        = color white . centre . scale' 0.2
+                                                    gameover         = centre . scale' 0.25 . shiftDown (-45*hwidth) . color red $ Text "Game Over!"
+                                                    highscore score  =                        scoreText $ Text ("High score: " ++ score)
+                                                    yourscore        = shiftDown (5*hwidth) . scoreText $ Text ("Your score: " ++ show (score gstate)) 
                                                 in 
                                                   do
-                                                    content     <- readFile "scores/highscores.txt"
-                                                    let highscores' = lines content
-                                                        highscores  | not (null highscores') = map read highscores' :: [Int]
-                                                                    | otherwise              = [0]
-                                                        highest     = maximum highscores
+                                                    content          <- readFile "scores/highscores.txt"
+                                                    let highscores'  = lines content
+                                                        highscores   | not (null highscores') = map read highscores' :: [Int]
+                                                                     | otherwise              = [0]
+                                                        highest      = maximum highscores
                                                     return $ Pictures [gameover, characters, yourscore, highscore $ show highest]
 
                 | otherwise                 = (return . viewPure) gstate
