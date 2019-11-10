@@ -13,7 +13,7 @@ module Initials where
     initialGameState = resetGameState 0 1
 
     resetGameState :: Int -> Int -> Gamestate
-    resetGameState score level = Gamestate almostEmptyMaze p initialEnemies d score level 0 GameOn 0 False
+    resetGameState score level = Gamestate initialMaze p initialEnemies d score level 0 GameOn 0 False
             where 
                 p@(Pacman _ d _ _) = initialPacman
     {- 
@@ -58,7 +58,7 @@ module Initials where
         PACMAN 
      -}
     initialPacman :: Pacman
-    initialPacman = basePacman 3
+    initialPacman = basePacman 10
     
     initialPacmanLocation :: Location
     initialPacmanLocation = (7,3)
