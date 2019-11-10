@@ -1,4 +1,7 @@
 module Types where
+
+    import Graphics.Gloss.Data.Color
+
     {-
         MAZE
     -}
@@ -88,3 +91,10 @@ module Types where
 
     blinkingTimer :: Float
     blinkingTimer = 4
+
+    -- Colors
+    ghostColor :: Ghost -> Color
+    ghostColor Blinky {} = makeColorI 255 0   0   255
+    ghostColor Pinky  {} = makeColorI 255 184 255 255
+    ghostColor Inky   {} = makeColorI 0   255 255 255
+    ghostColor Clyde  {} = makeColorI 255 184 82  255
