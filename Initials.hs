@@ -20,45 +20,27 @@ module Initials where
         MAZE 
      -}
     initialMaze :: Maze
-    initialMaze = [ Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall,
-                    Wall, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Wall,
-                    Wall, Dot, Wall, Wall, Wall, Dot, Wall, Wall, Wall, Dot, Wall, Wall, Wall, Dot, Wall,
-                    Wall, Dot, Wall, Energizer, Dot, Dot, Wall, Empty, Wall, Dot, Dot, Energizer, Wall, Dot, Wall,
-                    Wall, Dot, Wall, Dot, Wall, Dot, Dot, Dot, Dot, Dot, Wall, Dot, Wall, Dot, Wall,
-                    Wall, Dot, Dot, Dot, Dot, Wall, Wall, Wall, Wall, Wall, Dot, Dot, Dot, Dot, Wall,
-                    Wall, Dot, Wall, Wall, Dot, Wall, Spawn, Spawn, Spawn, Wall, Dot, Wall, Wall, Dot, Wall,
-                    Wall, Dot, Wall, Dot, Dot, Wall, Spawn, Spawn, Spawn, Wall, Dot, Dot, Wall, Dot, Wall,
-                    Wall, Dot, Wall, Wall, Dot, Wall, Spawn, Spawn, Spawn, Wall, Dot, Wall, Wall, Dot, Wall,
-                    Wall, Dot, Dot, Dot, Dot, Wall, Wall, SpawnDoor, Wall, Wall, Dot, Dot, Dot, Dot, Wall,
-                    Wall, Dot, Wall, Dot, Wall, Dot, Dot, Dot, Dot, Dot, Wall, Dot, Wall, Dot, Wall,
-                    Wall, Dot, Wall, Energizer, Dot, Dot, Wall, Fruit, Wall, Dot, Dot, Energizer, Wall, Dot, Wall,
-                    Wall, Dot, Wall, Wall, Wall, Dot, Wall, Wall, Wall, Dot, Wall, Wall, Wall, Dot, Wall,
-                    Wall, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Dot, Wall,
-                    Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall
+    initialMaze = [ Wall, Wall, Wall, Wall,      Wall, Wall, Wall,  Wall,      Wall,  Wall, Wall, Wall,      Wall, Wall, Wall,
+                    Wall, Dot,  Dot,  Dot,       Dot,  Dot,  Dot,   Dot,       Dot,   Dot,  Dot,  Dot,       Dot,  Dot,  Wall,
+                    Wall, Dot,  Wall, Wall,      Wall, Dot,  Wall,  Wall,      Wall,  Dot,  Wall, Wall,      Wall, Dot,  Wall,
+                    Wall, Dot,  Wall, Energizer, Dot,  Dot,  Wall,  Empty,     Wall,  Dot,  Dot,  Energizer, Wall, Dot,  Wall,
+                    Wall, Dot,  Wall, Dot,       Wall, Dot,  Dot,   Dot,       Dot,   Dot,  Wall, Dot,       Wall, Dot,  Wall,
+                    Wall, Dot,  Dot , Dot,       Dot,  Wall, Wall,  Wall,      Wall,  Wall, Dot,  Dot,       Dot,  Dot,  Wall,
+                    Wall, Dot,  Wall, Wall,      Dot,  Wall, Spawn, Spawn,     Spawn, Wall, Dot,  Wall,      Wall, Dot,  Wall,
+                    Wall, Dot,  Wall, Dot,       Dot,  Wall, Spawn, Spawn,     Spawn, Wall, Dot,  Dot,       Wall, Dot,  Wall,
+                    Wall, Dot,  Wall, Wall,      Dot,  Wall, Spawn, Spawn,     Spawn, Wall, Dot,  Wall,      Wall, Dot,  Wall,
+                    Wall, Dot,  Dot , Dot,       Dot,  Wall, Wall,  SpawnDoor, Wall,  Wall, Dot,  Dot,       Dot,  Dot,  Wall,
+                    Wall, Dot,  Wall, Dot,       Wall, Dot,  Dot,   Dot,       Dot,   Dot,  Wall, Dot,       Wall, Dot,  Wall,
+                    Wall, Dot,  Wall, Energizer, Dot,  Dot,  Wall,  Fruit,     Wall,  Dot,  Dot,  Energizer, Wall, Dot,  Wall,
+                    Wall, Dot,  Wall, Wall,      Wall, Dot,  Wall,  Wall,      Wall,  Dot,  Wall, Wall,      Wall, Dot,  Wall,
+                    Wall, Dot,  Dot,  Dot,       Dot,  Dot,  Dot,   Dot,       Dot,   Dot,  Dot,  Dot,       Dot,  Dot,  Wall,
+                    Wall, Wall, Wall, Wall,      Wall, Wall, Wall,  Wall,      Wall,  Wall, Wall, Wall,      Wall, Wall, Wall
                   ]
-    -- (Almost) empty maze, for testing purposes
-    almostEmptyMaze :: Maze
-    almostEmptyMaze = [ Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall,
-                        Wall, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Dot, Empty, Empty, Empty, Empty, Empty, Wall,
-                        Wall, Empty, Wall, Wall, Wall, Empty, Wall, Wall, Wall, Empty, Wall, Wall, Wall, Empty, Wall,
-                        Wall, Empty, Wall, Empty, Empty, Empty, Wall, Empty, Wall, Empty, Empty, Empty, Wall, Empty, Wall,
-                        Wall, Empty, Wall, Empty, Wall, Empty, Empty, Empty, Empty, Empty, Wall, Empty, Wall, Empty, Wall,
-                        Wall, Empty, Empty, Empty, Empty, Wall, Wall, Wall, Wall, Wall, Empty, Empty, Empty, Empty, Wall,
-                        Wall, Empty, Wall, Wall, Empty, Wall, Spawn, Spawn, Spawn, Wall, Empty, Wall, Wall, Empty, Wall,
-                        Wall, Empty, Wall, Empty, Empty, Wall, Spawn, Spawn, Spawn, Wall, Empty, Empty, Wall, Empty, Wall,
-                        Wall, Empty, Wall, Wall, Empty, Wall, Spawn, Spawn, Spawn, Wall, Empty, Wall, Wall, Empty, Wall,
-                        Wall, Empty, Empty, Empty, Empty, Wall, Wall, SpawnDoor, Wall, Wall, Empty, Empty, Empty, Empty, Wall,
-                        Wall, Empty, Wall, Empty, Wall, Empty, Empty, Empty, Empty, Empty, Wall, Empty, Wall, Empty, Wall,
-                        Wall, Empty, Wall, Empty, Empty, Empty, Wall, Fruit, Wall, Empty, Empty, Empty, Wall, Empty, Wall,
-                        Wall, Empty, Wall, Wall, Wall, Empty, Wall, Wall, Wall, Empty, Wall, Wall, Wall, Empty, Wall,
-                        Wall, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Wall,
-                        Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall
-                    ]   
     {- 
         PACMAN 
      -}
     initialPacman :: Pacman
-    initialPacman = basePacman 10
+    initialPacman = basePacman 3 -- The second parameter stands for Pacman's starting lives
     
     initialPacmanLocation :: Location
     initialPacmanLocation = (7,3)
@@ -80,7 +62,6 @@ module Initials where
      -}
 
     initialEnemies :: [Ghost]
-    --initialEnemies = [Blinky (7,10) W Chase 0, Pinky (7,7) S Chase 0, Inky (6,7) N Chase 0, Clyde (8,7) N Chase 0]
     initialEnemies = [baseBlinky 0, basePinky 0, baseInky 0, baseClyde 0]
 
     baseBlinky :: Float -> Ghost

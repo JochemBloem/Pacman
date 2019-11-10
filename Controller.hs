@@ -19,11 +19,11 @@ module Controller where
                                                                                 | otherwise = return gstate
     step secs gstate | mazeEmpty                                            = return $ (resetGameState (score newGstate + 500) (lvl + 1))  { player = resetPacman lvl (lives $ player gstate) }
                      | elapsedTime gstate + secs > nO_SECS_BETWEEN_CYCLES   = return $ ult finalGstate { elapsedTime = 0
-                                                                                                     , enemies     = newGhosts
-                                                                                                     , score       = newScore + 300 * length eatenGhosts
-                                                                                                     }
+                                                                                                       , enemies     = newGhosts
+                                                                                                       , score       = newScore + 300 * length eatenGhosts
+                                                                                                       }
                      | otherwise                                            = return $ ult newGstate   { elapsedTime = elapsedTime gstate + secs 
-                                                                                                     }
+                                                                                                       }
         where  
           -- often used variables
           pacman          = player   gstate
@@ -31,11 +31,10 @@ module Controller where
           m               = maze     gstate
           ghosts          = enemies  gstate
           lvl             = level    gstate
-          stat            = status   gstate
           notScaredGhosts = filter isNotScared      ghosts
           eatenGhosts     = filter (isEaten pacLoc) ghosts
           newScore        = score gstate
-          ult             = flip updateLevelTimer secs
+          ult             = flip updateLevelTimer secs -- Function to update the levelTimer inside the gameState
 
           -- updated pacman
           newPacman = move newPacman' m
@@ -44,7 +43,7 @@ module Controller where
                              | otherwise       = pacman
 
           pacmanDies :: Bool         
-          pacmanDies = roundedLocation (location newPacman) `elem` map (roundLoc . getGhostLocation) notScaredGhosts
+          pacmanDies = roundLoc (location newPacman) `elem` map (roundLoc . getGhostLocation) notScaredGhosts
 
           -- updated ghosts
           newGhosts   | pacmanDies = initialEnemies
@@ -85,6 +84,7 @@ module Controller where
                             scaredGhosts :: [Ghost]
                             scaredGhosts = map (`frighten` levelTimer gstate) (enemies gstate)
                             
+          -- Determines if the Maze has been cleared of all Dots and Energizers
           mazeEmpty :: Bool --     Allowed : Wall Spawn SpawnDoor Empty Fruit
                             -- Not Allowed : Energizer Dot
           mazeEmpty = all allowed m
@@ -100,12 +100,20 @@ module Controller where
     input e gstate = return (inputKey e gstate)
 
     inputKey :: Event -> Gamestate -> Gamestate
-    inputKey (EventKey (Char 'w') _ _ _) gstate = gstate { newDir = N }
-    inputKey (EventKey (Char 'a') _ _ _) gstate = gstate { newDir = W }
-    inputKey (EventKey (Char 's') _ _ _) gstate = gstate { newDir = S }
-    inputKey (EventKey (Char 'd') _ _ _) gstate = gstate { newDir = E }
-    inputKey (EventKey (Char 'p') _ _ _) gstate = gstate { status = Paused }
-    inputKey (EventKey (Char 'u') _ _ _) gstate = gstate { status = GameOn }
-    inputKey (EventKey (Char 'g') _ _ _) gstate = gstate { status = GameOver } -- @TODO: remove, just for debug sake
-    inputKey (EventKey (Char 'r') _ _ _) gstate = initialGameState
-    inputKey _                           gstate = gstate -- Otherwise keep the same
+    inputKey (EventKey (Char 'w') _ _ _           ) gstate = gstate { newDir = N }
+    inputKey (EventKey (SpecialKey KeyUp   ) _ _ _) gstate = gstate { newDir = N }
+    inputKey (EventKey (Char 'a') _ _ _           ) gstate = gstate { newDir = W }
+    inputKey (EventKey (SpecialKey KeyLeft ) _ _ _) gstate = gstate { newDir = W }
+    inputKey (EventKey (Char 's') _ _ _           ) gstate = gstate { newDir = S }
+    inputKey (EventKey (SpecialKey KeyDown ) _ _ _) gstate = gstate { newDir = S }
+    inputKey (EventKey (Char 'd') _ _ _           ) gstate = gstate { newDir = E }
+    inputKey (EventKey (SpecialKey KeyRight) _ _ _) gstate = gstate { newDir = E }
+    
+    -- Pause the game
+    inputKey (EventKey (Char 'p') _ _ _)            gstate = gstate { status = Paused }
+    -- Unpause the game
+    inputKey (EventKey (Char 'u') _ _ _)            gstate = gstate { status = GameOn }
+    -- Reset the game
+    inputKey (EventKey (Char 'r') _ _ _)            gstate = initialGameState
+    -- Otherwise, keep it the same
+    inputKey _                                      gstate = gstate

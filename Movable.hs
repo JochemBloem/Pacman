@@ -9,7 +9,7 @@ module Movable where
     import RandomNumber
    
     {- 
-        SHOW 
+        SHOW (For Debugging)
      -} 
     instance Show Direction where
         show N = "North"
@@ -42,12 +42,12 @@ module Movable where
         changeDirection p@(Pacman lo _ li ma) d m | pacmanAccessible targetField = Pacman lo d li ma
                                                   | otherwise                    = p
                 where
-                    (_, targetField) = getTargetTile m lo d pacmanSpeed
+                    (_, targetField) = getTargetTile m lo d movableSpeed
         move p@(Pacman lo@(x,y) d li ma) m     | pacmanAccessible targetField = Pacman targetLoc d li newangle'
-                                               | otherwise                    = p {location = (round' x, round' y)} -- put pacman in the middle of the field, so he can change direction
+                                               | otherwise                    = p {location = roundLoc lo} -- put pacman in the middle of the field, so he can change direction
             where 
-                (targetLoc, targetField)     = getTargetTile m lo d pacmanSpeed
-                newangle                     = ma - 8
+                (targetLoc, targetField)     = getTargetTile m lo d movableSpeed
+                newangle                     = ma - 8 -- Change pacman's mouth angle by 8 degrees every game tick. This makes for a decent opening and closing speed
                 newangle' | newangle < (-45) = 45
                           | otherwise        = newangle
     
@@ -58,44 +58,19 @@ module Movable where
         changeDirection (Inky   l _ g t i finit) d _ = Inky   l d g t i finit
         changeDirection (Clyde  l _ g t i finit) d _ = Clyde  l d g t i finit   
         -- move ghosts
-        move g@(Blinky l@(x, y) d gb t i finit) m  | ghostAccessible targetField = Blinky targetLoc             d gb t i finit
-                                                   | otherwise                   = Blinky (round' x, round' y)  d gb t i finit
-            where (targetLoc, targetField) = getTargetTile m l d pacmanSpeed
+        move g@(Blinky l@(x, y) d gb t i finit) m  | ghostAccessible targetField = Blinky  targetLoc            d gb t i finit
+                                                   | otherwise                   = Blinky  (roundLoc l)         d gb t i finit
+            where (targetLoc, targetField) = getTargetTile m l d movableSpeed
         move g@(Pinky  l@(x, y) d gb t i finit) m  | ghostAccessible targetField = Pinky   targetLoc            d gb t i finit
-                                                   | otherwise                   = Pinky   (round' x, round' y) d gb t i finit
-            where (targetLoc, targetField) = getTargetTile m l d pacmanSpeed
+                                                   | otherwise                   = Pinky   (roundLoc l)         d gb t i finit
+            where (targetLoc, targetField) = getTargetTile m l d movableSpeed
         move g@(Inky   l@(x, y) d gb t i finit) m  | ghostAccessible targetField = Inky    targetLoc            d gb t i finit
-                                                   | otherwise                   = Inky    (round' x, round' y) d gb t i finit
-            where (targetLoc, targetField) = getTargetTile m l d pacmanSpeed
+                                                   | otherwise                   = Inky    (roundLoc l)         d gb t i finit
+            where (targetLoc, targetField) = getTargetTile m l d movableSpeed
         move g@(Clyde  l@(x, y) d gb t i finit) m  | ghostAccessible targetField = Clyde   targetLoc            d gb t i finit
-                                                   | otherwise                   = Clyde   (round' x, round' y) d gb t i finit
-            where (targetLoc, targetField) = getTargetTile m l d pacmanSpeed
+                                                   | otherwise                   = Clyde   (roundLoc l)         d gb t i finit
+            where (targetLoc, targetField) = getTargetTile m l d movableSpeed
 
-    getTargetTile :: Maze -> Location -> Direction -> Float -> TargetTile
-    getTargetTile m (x,y) N v = (newLoc, getField m checkLoc)
-        where 
-            checkLoc          = (round' x,     round' $ y + (0.5 + v))
-            newLoc            = (x, y + v)
-    getTargetTile m (x,y) E v = (newLoc, getField m checkLoc) 
-        where 
-            checkLoc          = (round' $ x + (0.5 + v), round' y)
-            newLoc            = (x + v, y)
-    getTargetTile m (x,y) S v = (newLoc, getField m checkLoc) 
-        where 
-            checkLoc          = (round' x,     round' $ y - (0.5 + v))
-            newLoc            = (x, y - v)
-    getTargetTile m (x,y) W v = (newLoc, getField m checkLoc) 
-        where 
-            checkLoc          = (round' $ x - (0.5 + v), round' y)
-            newLoc            = (x - v, y)
-    
-    shiftLocation :: Direction -> Location -> Float -> Location
-    shiftLocation N (x,y) n = (x  , y+n)
-    shiftLocation E (x,y) n = (x+n, y  )
-    shiftLocation S (x,y) n = (x  , y-n)
-    shiftLocation W (x,y) n = (x-n, y  )
-
-    
     
     {- 
         GHOSTS 
@@ -111,8 +86,7 @@ module Movable where
                                                    | otherwise                        = g -- Cant change direction
                                                     where 
                                                         pacman   = player gstate
-                                                        (px, py) = location pacman
-                                                        pacLoc   = (round' px, round' py)
+                                                        pacLoc   = roundLoc $ location pacman
                                                         m        = maze gstate
                                                         newDir   | gb == Chase      = findPath m loc pacLoc dir
                                                                  | gb == Scatter    = findPath m loc (scatterLocation g) dir
@@ -122,8 +96,7 @@ module Movable where
                                                    | otherwise                        = g -- Cant change direction
                                                     where 
                                                         pacman   = player gstate
-                                                        (px, py) = location pacman
-                                                        pacLoc   = (round' px, round' py)
+                                                        pacLoc   = roundLoc $ location pacman
                                                         m        = maze gstate
                                                         newDir   | gb == Chase      = findPath m loc (shiftLocation (direction pacman) pacLoc 4) dir
                                                                  | gb == Scatter    = findPath m loc (scatterLocation g) dir
@@ -133,20 +106,19 @@ module Movable where
                                                    | otherwise                        = g -- Cant change direction
                                                     where 
                                                         pacman   = player gstate
-                                                        (px, py) = location pacman
-                                                        pacLoc   = (round' px, round' py)
+                                                        pacLoc   = roundLoc $ location pacman
                                                         m        = maze gstate
                                                         newDir   | gb == Chase      = findPath m loc inkyChaseLoc dir
                                                                  | gb == Scatter    = findPath m loc (scatterLocation g) dir
                                             
                                                         -- new location aim when chasing
                                                         inkyChaseLoc :: Location
-                                                        inkyChaseLoc = (round' x, round' y)
+                                                        inkyChaseLoc = roundLoc chaseLoc
                                                                 where 
-                                                                    (Blinky (bix,biy) _ _ _ _ _) = head (enemies gstate) -- gstate always contains enemies, if not a crash is fine
-                                                                    (px,py) = pacLoc
-                                                                    (bx,by) = (round' bix, round' biy)
-                                                                    (x,y)   = (bix + (px - bix) * 2,biy + (py - biy) * 2)
+                                                                    (Blinky bloc@(bix,biy) _ _ _ _ _) = head (enemies gstate) -- gstate always contains enemies, if not a crash is fine
+                                                                    (px,py)  = pacLoc
+                                                                    (bx,by)  = roundLoc bloc
+                                                                    chaseLoc = (bix + (px - bix) * 2,biy + (py - biy) * 2)
 
 
     aiStep gstate g@(Clyde  loc dir gb ms i finit) | isEaten pacLoc g                 = baseClyde ms
@@ -155,8 +127,7 @@ module Movable where
                                                    | otherwise                        = g -- Cant change direction
                                                     where 
                                                         pacman   = player gstate
-                                                        (px, py) = location pacman
-                                                        pacLoc   = (round' px, round' py)
+                                                        pacLoc   = roundLoc $ location pacman
                                                         m        = maze gstate
 
                                                         newDir   | gb == Chase && distance loc pacLoc > 5 = findPath m loc pacLoc dir     
@@ -165,7 +136,6 @@ module Movable where
     randomDirection :: Ghost -> Maze -> Location -> Ghost
     randomDirection g m loc = changeDirection ng newDir m
                         where
-                            -- @TODO check if length nbs < 3, than return g
                             nbs          = accessibleNeighbours m loc
                             (newDir, ng) = pickDirection loc nbs
 

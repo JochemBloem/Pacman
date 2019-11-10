@@ -40,10 +40,11 @@ module Types where
                          , lives      :: Int
                          , mouthangle :: Float
                          }
-    data Ghost = Blinky Location Direction GhostBehaviour Float Int Float
-               | Pinky  Location Direction GhostBehaviour Float Int Float
-               | Inky   Location Direction GhostBehaviour Float Int Float
-               | Clyde  Location Direction GhostBehaviour Float Int Float
+    --                                                    Internal clock    Random (start) index    Timestamp when the ghost becomes Frightened
+    data Ghost = Blinky Location Direction GhostBehaviour Float             Int                     Float
+               | Pinky  Location Direction GhostBehaviour Float             Int                     Float
+               | Inky   Location Direction GhostBehaviour Float             Int                     Float
+               | Clyde  Location Direction GhostBehaviour Float             Int                     Float
             deriving (Eq)
           
     data GhostBehaviour = Chase | Frightened | Scatter
@@ -56,17 +57,14 @@ module Types where
     nO_SECS_BETWEEN_CYCLES :: Float
     nO_SECS_BETWEEN_CYCLES = 0.05
     
-    pacmanSpeed :: Float
-    pacmanSpeed = 0.125 -- 1 devided by pacmanspeed must be an integer
-
-    ghostSpeed :: Float
-    ghostSpeed = 0.1 -- for some reason the different speed causes weird non-fatal errors
+    movableSpeed :: Float
+    movableSpeed = 0.125 -- 1 devided by movableSpeed must be an integer
 
     pixelsPerField :: Float
     pixelsPerField = 35
 
     boardSizeF :: (Float, Float)
-    boardSizeF =  (15.0 , 15.0 ) -- @TODO: make adjustable?
+    boardSizeF =  (15.0 , 15.0 )
     boardSizeI :: (Int  , Int  )
     boardSizeI =  (15   , 15   )
 

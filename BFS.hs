@@ -33,18 +33,19 @@ module BFS where
                             
                             ((_,closest):_) = sort [((`distance` dest) loc, loc) | (loc,_) <- disc]
 
+                            -- Determines if the currently looked at location is equal to the desired destination
                             isdest :: Location -> Location -> Direction
                             isdest localdest l | localdest == l = rwalk localdest disc
                                                | otherwise      = findPath' m origin localdest q'' disc'
-
+                            -- walks back the found path to find the first direction
                             rwalk :: Location -> [(Location, Location)] -> Direction
                             rwalk _ []                        = undefined -- THIS SHOULD NOT HAPPEN
                             rwalk curr route | next == origin = getDirection next curr
                                              | otherwise      = rwalk next route
                                              where
-                                                [(_, next)] = [p | p <- route, fst p == curr]
+                                                [(_, next)]   = [p | p <- route, fst p == curr]
 
-                                                
+    -- list of discovered locations                            
     discovered :: [(Location, Location)] -> Location -> Bool
     discovered [] _                     = False
     discovered ((x,_):xs) l | l == x    = True

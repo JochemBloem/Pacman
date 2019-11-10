@@ -88,22 +88,22 @@ module View where
     viewHeaders :: Gamestate -> Picture
     viewHeaders (Gamestate _ (Pacman _ _ lives _) _ _ score level' _ _ _ _) = Translate dx dy $ Pictures [pacmans', shiftRight (20*hwidth) $ headerText points, shiftRight (35*hwidth) $ headerText level]
                     where
-                      (x, y) = screenSizeF
-                      dx = (-1) * (x / 2) * 0.9
-                      dy =        (y / 2) * 0.88
-                      shiftRight dist = Translate dist 0
-                      hwidth = pixelsPerField / 3
+                      (x, y)            = screenSizeF
+                      dx                = (-1) * (x / 2) * 0.9
+                      dy                =        (y / 2) * 0.88
+                      shiftRight dist   = Translate dist 0
+                      hwidth            = pixelsPerField / 3
                       maxDisplayedLives = min 5 lives
-                      overflowLives = max 0 (lives - maxDisplayedLives)
-                      headerPacman = Translate 0 (hwidth / 2) $ rotate' E $ viewBasePacman hwidth 45
-                      pacmans = zip (replicate maxDisplayedLives headerPacman) [0..]
-                      tfwidths n = Translate (hwidth * 2 * n) 0
-                      pacmans' = Pictures $ [tfwidths n pacman | (pacman, n) <- pacmans] ++ overflow
-                      overflow | overflowLives > 0 = [shiftRight (hwidth * 10) $ scale' 0.1 $ color white $ Text ("+ " ++ show overflowLives)]
-                               | otherwise         = []
-                      headerText t = scale' 0.2 $ color white $ Text t
-                      points       = show score ++ " pts"
-                      level        = "Level " ++ show level'
+                      overflowLives     = max 0 (lives - maxDisplayedLives)
+                      headerPacman      = Translate 0 (hwidth / 2) $ rotate' E $ viewBasePacman hwidth 45
+                      pacmans           = zip (replicate maxDisplayedLives headerPacman) [0..]
+                      tfwidths n        = Translate (hwidth * 2 * n) 0
+                      pacmans'          = Pictures $ [tfwidths n pacman | (pacman, n) <- pacmans] ++ overflow
+                      overflow          | overflowLives > 0 = [shiftRight (hwidth * 10) $ scale' 0.1 $ color white $ Text ("+ " ++ show overflowLives)]
+                                        | otherwise         = []
+                      headerText t      = scale' 0.2 $ color white $ Text t
+                      points            = show score ++ " pts"
+                      level             = "Level "   ++ show level'
     {-
         Movable view functions
      -}

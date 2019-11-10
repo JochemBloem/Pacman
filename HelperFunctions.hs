@@ -9,11 +9,33 @@ module HelperFunctions where
     {-
         MOVABLE
     -}
-    roundedLocation :: Location -> Location
-    roundedLocation (x,y) = (round' x, round' y)
 
     isOnTile :: Location -> Bool
     isOnTile (x,y) = abs (round' x - x) < 0.01 && abs (round' y - y) < 0.01
+
+    getTargetTile :: Maze -> Location -> Direction -> Float -> TargetTile
+    getTargetTile m (x,y) N v = (newLoc, getField m checkLoc)
+        where 
+            checkLoc          = roundLoc (x,             y + (0.5 + v))
+            newLoc            = (x, y + v)
+    getTargetTile m (x,y) E v = (newLoc, getField m checkLoc) 
+        where 
+            checkLoc          = roundLoc (x + (0.5 + v), y            )
+            newLoc            = (x + v, y)
+    getTargetTile m (x,y) S v = (newLoc, getField m checkLoc) 
+        where 
+            checkLoc          = roundLoc (x,             y - (0.5 + v))
+            newLoc            = (x, y - v)
+    getTargetTile m (x,y) W v = (newLoc, getField m checkLoc) 
+        where 
+            checkLoc          = roundLoc (x - (0.5 + v), y            )
+            newLoc            = (x - v, y)
+    
+    shiftLocation :: Direction -> Location -> Float -> Location
+    shiftLocation N (x,y) n = (x  , y+n)
+    shiftLocation E (x,y) n = (x+n, y  )
+    shiftLocation S (x,y) n = (x  , y-n)
+    shiftLocation W (x,y) n = (x-n, y  )
     {-
         PACMAN
     -}
@@ -43,12 +65,6 @@ module HelperFunctions where
     getGhostDirection (Pinky  _ dir _ _ _ _) = dir
     getGhostDirection (Inky   _ dir _ _ _ _) = dir
     getGhostDirection (Clyde  _ dir _ _ _ _) = dir
-
-    setGhostDirection :: Direction -> Ghost -> Ghost
-    setGhostDirection d (Blinky loc _ b t i finit) = Blinky loc d b t i finit
-    setGhostDirection d (Pinky  loc _ b t i finit) = Pinky  loc d b t i finit
-    setGhostDirection d (Inky   loc _ b t i finit) = Inky   loc d b t i finit
-    setGhostDirection d (Clyde  loc _ b t i finit) = Clyde  loc d b t i finit
 
     getGhostTime :: Ghost -> Float
     getGhostTime (Blinky _ _ _ t _ _) = t
@@ -87,13 +103,13 @@ module HelperFunctions where
 
     unFrighten :: Ghost -> Float -> Ghost
     unFrighten g@(Blinky loc dir gb t i finit) now | now >= finit + frightenedTimer = Blinky loc dir Chase t i 0
-                                                   | otherwise         = g    
+                                                   | otherwise                      = g    
     unFrighten g@(Pinky  loc dir gb t i finit) now | now >= finit + frightenedTimer = Pinky  loc dir Chase t i 0
-                                                   | otherwise         = g    
+                                                   | otherwise                      = g    
     unFrighten g@(Inky   loc dir gb t i finit) now | now >= finit + frightenedTimer = Inky   loc dir Chase t i 0
-                                                   | otherwise         = g    
+                                                   | otherwise                      = g    
     unFrighten g@(Clyde  loc dir gb t i finit) now | now >= finit + frightenedTimer = Clyde  loc dir Chase t i 0
-                                                   | otherwise         = g
+                                                   | otherwise                      = g
 
     {-
         MAZE
@@ -141,14 +157,6 @@ module HelperFunctions where
     {-
         OTHER
     -}
-
-    -- returns all items from list 1 that are not in list 2
-    inverseList :: Eq a => [a] -> [a] -> [a]
-    inverseList l  []    = l
-    inverseList [] _     = []
-    inverseList (x:xs) l | x `elem` l =     inverseList xs l
-                         | otherwise  = x : inverseList xs l
-
     round' :: (RealFrac a, Num b) => a -> b
     round' = fromIntegral . round
 
@@ -160,11 +168,6 @@ module HelperFunctions where
                 where
                     f :: Float -> Float
                     f n = n*n
-
-    amountInList :: Eq a => a -> [a] -> Int
-    amountInList _ []     = 0
-    amountInList n (x:xs) | x == n    = 1 + amountInList n xs
-                          | otherwise =     amountInList n xs
 
     -- update the levelTimer in the gamestate
     updateLevelTimer :: Gamestate -> Float -> Gamestate
